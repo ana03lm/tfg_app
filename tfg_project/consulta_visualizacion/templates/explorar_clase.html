@@ -1,0 +1,64 @@
+{% extends "base_generic.html" %}
+
+{% block title %}
+    <title>{{ clase }} | TFG</title>
+{% endblock %}
+
+{% block content %}
+<div class="explorar-container">
+    <h1>Clase: {{ clase }}</h1>
+
+    <!-- Sección de propiedades -->
+    <div class="info-card">
+        <h2>Propiedades utilizadas</h2>
+
+        {% if propiedades %}
+            <ul>
+                {% for nombre, frecuencia in propiedades.items %}
+                    <li>{{ nombre }} ({{frecuencia}})</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No hay propiedades registradas para esta clase.</p>
+        {% endif %}
+
+    </div>
+
+    <!-- Sección de instancias con paginación -->
+    <div class="info-card">
+        <h2>Listado de instancias. Número total: {{ num_instancias}}</h2>
+
+        {% if instancias %}
+            <ul>
+                {% for instancia in instancias %}
+                    <li><a href="{% url 'visualizar_instancia' %}?dataset={{ dataset }}&uri={{ instancia.uri|urlencode }}&nombre={{instancia.nombre|urlencode}}">
+                        {{ instancia.nombre }}</a></li>
+                {% endfor %}
+            </ul>
+
+            <!-- Controles de paginación -->
+            <div class="pagination">
+                {% if instancias.has_previous %}
+                    <a href="?dataset={{ dataset }}&page=1">⬅⬅ Primera</a>
+                    <a href="?dataset={{ dataset }}&page={{ instancias.previous_page_number }}">⬅ Anterior</a>
+                {% endif %}
+
+                <span>Página {{ instancias.number }} de {{ instancias.paginator.num_pages }}</span>
+
+                {% if instancias.has_next %}
+                    <a href="?dataset={{ dataset }}&page={{ instancias.next_page_number }}">Siguiente ➡</a>
+                    <a href="?dataset={{ dataset }}&page={{ instancias.paginator.num_pages }}">Última  ➡➡</a>
+                {% endif %}
+            </div>
+
+        {% else %}
+            <p>No hay instancias de esta clase en el dataset.</p>
+        {% endif %}
+
+    </div>
+
+    <!-- Botón para volver -->
+    <a href="{% url 'index' %}?dataset={{ dataset }}" class="back-button">⬅ Volver al Dashboard </a>
+</div>
+{% endblock %}
+
