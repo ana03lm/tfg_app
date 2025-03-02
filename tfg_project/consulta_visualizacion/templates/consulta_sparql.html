@@ -1,0 +1,71 @@
+{% extends "base_generic.html" %}
+
+{% load custom_filters %} <!-- Carga el filtro para extraer valores de JSON -->
+
+{% block title %}
+    <title>Consulta SPARQL | TFG</title>
+{% endblock %}
+
+{% block content %}
+<div class="consulta-container">
+    <h1>Consulta de Datos SPARQL</h1>
+
+    <!--Formulario consulta-->
+    <form method="POST" class="consulta-form">
+        {% csrf_token %}
+        <label for="consulta_sparql">Introduce tu consulta SPARQL:</label>
+        <textarea name="consulta_sparql" id="consulta_sparql" rows="6"> {{ ultima_consulta }}</textarea>
+        <br>
+        <button type="submit">Ejecutar Consulta</button>
+    </form>
+
+    <!--Mensaje de error-->
+    {% if error_message %}
+        <p class="error">{{ error_message }}</p>
+    {% endif %}
+
+    <!--Resultados en formato tabla-->
+    {% if consulta_realizada %}
+        {% if page_obj and page_obj.paginator.count > 0 %}
+            <h2>Resultados ({{num_resultados}}) </h2>
+            <table>
+                <thead>
+                    <tr>
+                        {% for var in query_result.head.vars %}
+                            <th>{{ var }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for row in page_obj %}
+                        <tr>
+                            {% for var in query_result.head.vars %}
+                                <td>{{ row|get_value:var }}</td> <!-- Usa el filtro para obtener el contenido JSON -->
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Controles de paginación -->
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?dataset={{ dataset }}&page=1">⬅⬅ Primera</a>
+                    <a href="?dataset={{ dataset }}&page={{ page_obj.previous_page_number }}">⬅ Anterior</a>
+                {% endif %}
+
+                <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+
+                {% if page_obj.has_next %}
+                    <a href="?dataset={{ dataset }}&page={{ page_obj.next_page_number }}">Siguiente ➡</a>
+                    <a href="?dataset={{ dataset }}&page={{ page_obj.paginator.num_pages }}">Última ➡➡</a>
+                {% endif %}
+            </div>
+        {% else %}
+            <p>No se encontraron resultados para esta consulta.</p>
+        {% endif %}
+    {% endif %}
+</div>
+
+{% endblock %}

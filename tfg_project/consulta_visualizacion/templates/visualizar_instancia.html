@@ -1,0 +1,56 @@
+{% extends "base_generic.html" %}
+
+{% block title %}
+    <title> {{ instancia_nombre}} | TFG</title>
+{% endblock %}
+
+{% block content %}
+<div class="explorar-container">
+    <h1>Instancia: {{ instancia_nombre }}</h1>
+
+    <div class="info-card">
+        <h2>Datos de la instancia</h2>
+        {% if detalles %}
+        <!--Se muestran los datos de la instancia en formato tabla-->
+            <div>
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Propiedad</th>
+                        <th>Valor</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for propiedad, valor, enlace, tipo in detalles %}
+                        <tr>
+                            <td>{{ propiedad }}</td>
+                            <td>
+                                {% if enlace %}
+                                    {% if tipo == "clase" %}
+                                        <a href="{{ enlace }}" >{{ valor }}</a>
+                                    {% elif tipo == "instancia" %}
+                                        <a href="{{ enlace }}" >{{ valor }}</a>
+                                    {% elif tipo == "externo" %}
+                                        <a href="{{ enlace }}" target="_blank">{{ valor }}</a>
+                                    {% endif %}
+                                {% else %}
+                                    {{ valor }}  <!-- Valor normal -->
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+
+        {% else %}
+            <p>No hay datos disponibles para esta instancia.</p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
+

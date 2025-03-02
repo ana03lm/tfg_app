@@ -1,0 +1,22 @@
+<!-- formulario de subida de datos -->
+{% extends "base_generic.html" %}
+
+{% block title %}
+    <title>Subida | TFG </title>
+{% endblock %}
+
+{% block content %}
+    <h1>Subir Archivo RDF</h1>
+
+    <!-- Formulario -->
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %} <!--token de seguridad de django-->
+        {{ form.as_p }} <!--formulario de forms.py-->
+        <button type="submit">Subir Archivo</button>
+    </form>
+
+    <!-- Mensajes correcto e incorrecto -->
+    {% if message %} <p class="correcto">{{ message }}</p> {% endif %}
+    {% if error %} <p class="error">{{ error }}</p> {% endif %}
+
+{% endblock %}

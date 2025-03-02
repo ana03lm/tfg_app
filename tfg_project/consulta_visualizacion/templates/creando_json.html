@@ -1,0 +1,36 @@
+{% extends "base_generic.html" %}
+
+{% block title %}
+<title>Generando JSON | TFG</title>
+{% endblock %}
+
+{% block content %}
+    <h2>Generando visualización...</h2>
+    <p>Se están procesando los datos.</p>
+    <p> Esta operación podría tardar unos minutos. </p>
+
+    <!--Comprobar cuando se ha generado el JSON para devolver al index-->
+    <script>
+        // Función para verificar si se está generando el JSON aún
+        function checkIfJsonReady() {
+            fetch("{% url 'verificar_json' %}?dataset={{ dataset }}")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.exists && !data.generating) {
+                        // Solo redirige cuando el JSON está listo y no en proceso
+                        window.location.href = "{% url 'index' %}?dataset={{ dataset }}";
+                    } else {
+                        // Si aún se está generando, vuelve a verificar después de 2 segundos
+                        setTimeout(checkIfJsonReady, 2000);
+                    }
+                })
+                .catch(error => console.error("Error al verificar JSON:", error));
+        }
+    
+        // Ejecutar la verificación
+        checkIfJsonReady();
+    </script>
+    
+{% endblock %}
+
+

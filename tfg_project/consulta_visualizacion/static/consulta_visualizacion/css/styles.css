@@ -1,0 +1,428 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+
+/* Estilos generales */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  color: #333;
+  line-height: 1.6;
+  text-align: justify;
+  padding: 40px 40px;
+}
+
+h1, h2, h3 {
+  color: #222;
+  padding-top: 30px;
+}
+
+h1 {
+  font-size: 28px;
+  text-align: center;
+  margin-bottom: 25px;
+  color: #2c3e50;
+}
+
+h2 {
+  font-size: 22px;
+  margin-bottom: 15px;
+  border-bottom: 2px solid #b92929;
+  padding-bottom: 5px;
+}
+
+p {
+  font-size: 18px;
+}
+
+/* Navegación */
+nav ul {
+  list-style-type: none;
+  padding: 0;
+  position: relative; /* Asegura que los submenús se posicionen correctamente */
+  font-weight: bold;
+}
+
+nav ul li {
+  display: inline-block;
+  margin-right: 15px;
+  position: relative; /* Para que los submenús se posicionen dentro del elemento padre */
+}
+
+nav a {
+  color: black;
+  text-decoration: none;
+}
+
+nav a:hover{
+  color: blue;
+}
+
+details {
+  cursor: pointer;
+  position: relative;
+}
+
+details summary {
+  padding: 10px;
+  border-radius: 5px;
+  display: inline-block;
+  cursor: pointer;
+  position: relative;
+  list-style: none;
+}
+
+details summary:hover{
+  color: blue;
+}
+
+details summary::after {
+  content: " ▼"; /* Flecha hacia abajo */
+  font-size: 12px;
+  margin-left: 5px;
+}
+
+details[open] summary::after {
+  content: " ▲"; /* Flecha hacia arriba cuando está abierto */
+}
+
+details[open] ul {
+  position: absolute;
+  top: 100%; /* Hace que el submenú aparezca debajo del summary */
+  left: 0;
+  background-color: white;
+  border: 1px solid #ccc;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  list-style-type: none;
+  min-width: 150px;
+  z-index: 1000; /* Asegura que esté por encima de otros elementos */
+}
+
+details ul li {
+  display: block;
+  padding: 5px 10px;
+  white-space: nowrap; /* Evita que los textos largos se corten */
+}
+
+details ul li:hover {
+  background-color: #f0f0f0;
+}
+
+
+/* Estilos para formularios */
+form {
+  background: #fff;
+  padding: 20px;
+  margin: 20px auto;
+  max-width: 400px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+input, button {
+  display: block;
+  width: 100%;
+  margin: 10px 0;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+input:focus {
+  border-color: #007BFF;
+  outline: none;
+}
+
+button {
+  background: #007BFF;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  border: none;
+}
+
+button:hover {
+  background: #0056b3;
+}
+
+/* Formulario de consulta */
+.consulta-form {
+  width: 90%;
+  max-width: 1000px;
+}
+
+.consulta-form label {
+  font-size: 16px;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.consulta-form textarea {
+  width: 97%;
+  height: 200px;
+  font-size: 14px;
+  padding: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 5px;
+  resize: vertical;
+}
+
+/* Mensajes de éxito y error */
+.correcto {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 10px;
+  border-radius: 5px;
+  max-width: 400px;
+  margin: 20px auto;
+}
+
+.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 10px;
+  border-radius: 5px;
+  max-width: 400px;
+  margin: 20px auto;
+}
+
+/* Estilos de las estadísticas */
+.stats{
+  display:flex;
+  flex-direction: row;
+  padding:30px 0;
+}
+
+.stats > *{
+  background-color: white;
+  border-radius: 5px;
+  flex: 1 0 auto;
+  text-align: center;
+  padding: 20px;
+}
+
+.indicador{
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.grafico {
+  width: 100%;
+  overflow-x: auto; /* Si es más grande, permite scroll */
+  overflow-y: scroll;
+  padding-bottom: 20px;
+} 
+
+
+/* Botón de actualización */
+.update-form {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  margin: 0;
+  padding: 0;
+  background: None;
+  box-shadow: None;
+}
+
+.update-btn {
+  background-color: #007bff; 
+  color: white;
+  padding: 12px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.update-btn:hover {
+  background-color: #0056b3; /* Azul más oscuro */
+  transform: scale(1.05);
+}
+
+.update-btn:active {
+  background-color: #004085;
+  transform: scale(0.95);
+}
+
+/* Paginación */
+.pagination {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.pagination a {
+  display: inline-block;
+  padding: 10px 15px;
+  margin: 5px;
+  color: white;
+  background-color: #3498db;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background 0.3s;
+  font-size: 14px;
+}
+
+.pagination a:hover {
+  background-color: #2980b9;
+}
+
+.pagination span {
+  margin: 0 12px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+/* Tablas */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  table-layout: fixed; /* Ajusta las columnas de manera uniforme */
+}
+
+th, td {
+  padding: 12px;
+  border: 1px solid #ddd;
+  text-align: left;
+  word-break: break-word; /* Permite dividir palabras largas */
+  white-space: normal; /* Permite saltos de línea */
+  overflow-wrap: break-word; /* Divide palabras largas */
+}
+
+th {
+  background: #3498db;
+  color: white;
+  font-weight: bold;
+}
+
+tr:nth-child(even) {
+  background: #f2f2f2;
+}
+
+/* Página de las clases e instancias */
+.explorar-container {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 20px;
+  background: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.info-card {
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 25px;
+}
+
+.info-card ul {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 15px;
+  justify-content: center;
+}
+
+.info-card li {
+  background: #ecf0f1;
+  padding: 12px;
+  border-radius: 8px;
+  transition: background 0.3s ease;
+  text-align: center;
+  font-weight: bold;
+  font-size: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  word-wrap: break-word; /* Permite que las palabras largas se dividan */
+  overflow-wrap: break-word; /* Alternativa para navegadores modernos */
+  white-space: normal; /* Permite que el texto pase a la siguiente línea */
+}
+
+.info-card li:hover {
+  background: #d5dbdb;
+}
+
+.back-button {
+  display: block;
+  width: fit-content;
+  margin: 30px auto;
+  padding: 12px 18px;
+  background: #3498db;
+  color: white;
+  text-align: center;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 16px;
+  transition: background 0.3s;
+}
+
+.back-button:hover {
+  background: #2980b9;
+}
+
+/* Ocultar/mostrar filtros */
+.filtros {
+  display: none;
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 5px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  margin-top: 10px;
+}
+
+.filtro-toggle button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.filtro-toggle button:hover {
+  background: #0056b3;
+}
+
+.filtros:not(.oculto) {
+  display: block;
+}
+
+
+/* Estilos para mejorar la apariencia en móviles */
+@media (max-width: 800px) {
+  body {
+      font-size: 16px;
+  }
+  
+  form {
+      width: 90%;
+  }
+
+  .stats{
+    display:block;
+    flex-direction: row;
+    padding:30px 0;
+  }
+
+  .update-form {
+    position: static; /* Elimina la posición absoluta */
+    display: flex;
+    justify-content: center;  /* Centra el botón */
+    margin: auto;
+  }
+
+  .update-btn {
+    width: 50%;  /* Hace que el botón sea más ancho */
+    max-width: 300px; /* Limita el ancho del botón */
+}
+}
