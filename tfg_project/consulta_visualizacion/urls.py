@@ -10,5 +10,6 @@ urlpatterns = [
 #     path("ayuda/", ayuda, name="ayuda"),
     path("vista_generar_json/", views.vista_generar_json, name="vista_generar_json"),
     path("verificar_json/", views.verificar_json, name="verificar_json"),
+    path("exportar_sparql/", views.exportar_resultados_sparql, name="exportar_resultados_sparql"),
 
 ]

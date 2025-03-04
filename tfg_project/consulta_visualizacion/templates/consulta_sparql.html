@@ -28,6 +28,18 @@
     {% if consulta_realizada %}
         {% if page_obj and page_obj.paginator.count > 0 %}
             <h2>Resultados ({{num_resultados}}) </h2>
+
+            <!--Formulario para exportacion de datos-->
+            <form id="exportForm" method="GET" action="{% url 'exportar_resultados_sparql' %}">
+                <label for="formato">Selecciona el formato:</label>
+                <select name="formato" id="formato">
+                    <option value="csv"> CSV</option>
+                    {% comment %} <option value="ttl">Turtle (TTL)</option> {% endcomment %}
+                </select>
+                <button type="submit">Descargar</button>
+            </form>
+           
+
             <table>
                 <thead>
                     <tr>
@@ -41,7 +53,7 @@
                     {% for row in page_obj %}
                         <tr>
                             {% for var in query_result.head.vars %}
-                                <td>{{ row|get_value:var }}</td> <!-- Usa el filtro para obtener el contenido JSON -->
+                                <td>{{ row|get_value:var|safe }}</td> <!-- Se añade "|safe" para interpretar HTML -->
                             {% endfor %}
                         </tr>
                     {% endfor %}

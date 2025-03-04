@@ -1,12 +1,14 @@
 from .sparql_query import SPARQLQuery  # Importamos la clase para consultas SPARQL
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import os
 import urllib.parse
+from rdflib import Graph, URIRef, Literal, Namespace, RDF
 import requests
 import json
+import csv
 import threading
 from .forms import RDFUploadForm, DatasetSelectionForm
 from consulta_visualizacion import utils
@@ -192,13 +194,6 @@ def explorar_clase(request, clase):
         }} GROUP BY ?propiedad ORDER BY DESC (?num_propiedad)
     """
 
-    # Consulta para obtener el número total de instancias de la clase
-    query_num_instancias = f"""
-        SELECT (COUNT(DISTINCT ?instancia) AS ?total_instancias) WHERE {{
-            ?instancia a <{uri_real_clase}> .
-        }}
-    """
-
     # Obtener filtros desde la URL
     filtro_clase = request.GET.get("filtro_clase", "").strip()
     filtro_propiedad = request.GET.get("filtro_propiedad", "").strip()
@@ -243,15 +238,11 @@ def explorar_clase(request, clase):
 
     # Ejecutamos las consultas
     resultado_propiedades = sparql.ejecutar_consulta(query_propiedades)
-    resultado_num_instancias = sparql.ejecutar_consulta(query_num_instancias)
     resultado_instancias = sparql.ejecutar_consulta(query_instancias)
 
     # Procesamos las propiedades
     propiedades = {utils.obtener_nombre_uri(res["propiedad"]["value"]): res["num_propiedad"]["value"]
                    for res in resultado_propiedades["results"]["bindings"]}
-
-    # Num instancias
-    num_instancias_totales = resultado_num_instancias["results"]["bindings"][0]["total_instancias"]["value"] if resultado_num_instancias["results"]["bindings"] else "0"
 
     # Procesamos las instancias
     instancias = []
@@ -261,6 +252,9 @@ def explorar_clase(request, clase):
         nombre_mostrado = label if label else utils.obtener_nombre_uri(uri)  # Si hay label, se usa; si no, se extrae el nombre de la URI
         instancias.append({"uri": uri, "nombre": nombre_mostrado})
 
+    # Contar el total de instancias obtenidas de la consulta SPARQL
+    num_instancias = len(instancias) 
+    
     # Paginación de instancias
     paginator = Paginator(instancias, 20)
     page_number = request.GET.get("page")
@@ -270,7 +264,7 @@ def explorar_clase(request, clase):
         "clase": clase,
         "propiedades": propiedades,
         "instancias": page_obj,
-        "num_instancias": num_instancias_totales,
+        "num_instancias": num_instancias,
         "dataset": selected_dataset,
         "filtro_clase": filtro_clase,
         "filtro_propiedad": filtro_propiedad,
@@ -381,7 +375,7 @@ def consulta_sparql(request):
     error_message = None
     resultados = []  
     page_obj = None  
-    consulta_realizada = False  # Para mostrar o no mensaje sobre no resultados
+    consulta_realizada = False  # Para controlar si se debe mostrar la tabla de resultados
     num_resultados = 0 
 
     # Si el usuario ha enviado una nueva consulta (POST) se guarda en la sesión y se redirige a la página 1
@@ -407,6 +401,13 @@ def consulta_sparql(request):
             query_result = sparql.ejecutar_consulta(consulta)
             resultados = query_result.get("results", {}).get("bindings", [])  # Si no hay resultados, devolvemos una lista vacía
             num_resultados = len(resultados) #Contar el número de resultados obtenidos
+            
+            # Guardar resultados en la sesión para la exportación
+            request.session["sparql_resultados"] = resultados
+            request.session["sparql_columnas"] = query_result.get("head", {}).get("vars", [])
+            request.session["sparql_query"] = consulta
+            request.session.modified = True  # Asegurar que Django guarda la sesión
+            
         except Exception as e:
             error_message = f"Error al ejecutar la consulta: {str(e)}"
             resultados = []  # En caso de error, se deja la lista vacía
@@ -429,3 +430,74 @@ def consulta_sparql(request):
         "num_resultados": num_resultados
     })
 
+# ---
+#  Intenta extraer el espacio de nombres del dataset a partir de los resultados SPARQL
+# def obtener_espacio_nombres(resultados):
+#     for fila in resultados:
+#         for var, valor_dict in fila.items():
+#             valor = valor_dict.get("value", "")
+#             if valor.startswith("http"):  # Buscar una URI válida en los datos
+#                 namespace = valor.rsplit("/", 1)[0] + "/"  # Obtener el namespace base
+#                 return Namespace(namespace)  # Retornar el Namespace de rdflib
+#     return Namespace("http://default.org/")  # Valor por defecto si no se encuentra un namespace
+
+#  Vista para exportar resultados almacenados en la sesión en el formato seleccionado (CSV o TTL)
+def exportar_resultados_sparql(request):
+    
+    formato = request.GET.get("formato", "csv").strip()  # Formato de exportación (por defecto, CSV)
+
+    # Recuperar los resultados almacenados en la sesión
+    resultados = request.session.get("sparql_resultados")
+    columnas = request.session.get("sparql_columnas")
+    consulta = request.session.get("sparql_query")
+
+    if not resultados or not consulta:
+        return HttpResponse("No hay datos para exportar. Realiza una consulta primero.", status=400)
+
+    # Exportar como CSV
+    if formato == "csv":
+        # Creación de respuesta en forma de archivo descargable csv
+        response = HttpResponse(content_type="text/csv") 
+        response["Content-Disposition"] = 'attachment; filename="consulta_sparql.csv"'
+        
+        writer = csv.writer(response)
+        writer.writerow(columnas)  # Escribir cabecera
+        # Recorre los resultados para crear el csv
+        for fila in resultados:
+            writer.writerow([fila.get(var, {}).get("value", "") for var in columnas])
+        return response
+
+    # **Exportación a TTL (Turtle)**
+    # elif formato == "ttl":
+    #     g = Graph()
+    #     base_ns = "http://ejemplo.com/"  # Puedes cambiarlo según el dataset
+    #     ns = Namespace(base_ns)
+    #     g.bind("ex", ns)  # Asignar prefijo "ex" para las URIs
+
+    #     for fila in resultados:
+    #         # Asignar un sujeto a la primera URI encontrada en la fila
+    #         sujeto = None
+    #         for var in columnas:
+    #             if var in fila:
+    #                 valor = fila[var]["value"]
+
+    #                 # Si el valor es una URI, convertirlo en URIRef
+    #                 if valor.startswith("http"):
+    #                     nodo = URIRef(valor)
+    #                 else:
+    #                     nodo = Literal(valor)
+
+    #                 # La primera URI será el sujeto, el resto serán predicados-objetos
+    #                 if sujeto is None:
+    #                     sujeto = nodo
+    #                 else:
+    #                     g.add((sujeto, ns[var], nodo))  # Se asigna la relación en RDF
+
+    #     # Serializar y devolver el archivo TTL
+    #     response = HttpResponse(content_type="text/turtle")
+    #     response["Content-Disposition"] = 'attachment; filename="consulta_sparql.ttl"'
+    #     response.write(g.serialize(format="turtle"))
+
+    #     return response
+
+    return HttpResponse("Formato no soportado.", status=400)

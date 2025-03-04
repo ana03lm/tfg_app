@@ -30,7 +30,7 @@ JSON_DIR = "json_cache"
 if not os.path.exists(JSON_DIR):
     os.makedirs(JSON_DIR)
 
-# Genera el JSON con los datos del dataset y lo guarda en disco
+# Genera el JSON con los datos del dataset 
 def generar_json_dataset(selected_dataset):
     
     # Asegurar que el directorio JSON existe antes de generar el archivo
@@ -81,8 +81,9 @@ def generar_json_dataset(selected_dataset):
         resultado_propiedades = sparql.ejecutar_consulta(consultas_diccionarios["propiedades"])
         data["propiedades"] = {res["label"]["value"]: res["propiedad"]["value"] for res in resultado_propiedades["results"]["bindings"] if "label" in res and "propiedad" in res}
     except Exception as e:
-        print(f"Error en {key}: {e}")
-        data[key] = {}
+        print(f"Error en clases o propiedades: {e}")
+        data["clases"] = {}
+        data["propiedades"] = {}
             
     ## DISTRIBUCIÓN DE CLASES Y PROPIEDADES
     consultas_distribucion = {
@@ -123,7 +124,8 @@ def generar_json_dataset(selected_dataset):
                                     ?s ?p ?o .
                                     ?s a ?s_class .
                                 } 
-                                GROUP BY ?s_class ?p""",
+                                GROUP BY ?s_class ?p
+                                ORDER BY DESC(?count)""",
         "relacion_instancias_clases": """SELECT 
                                     (SAMPLE(REPLACE(STR(?clase_origen), "^.*[#/]", "")) AS ?clase_origen_label)
                                     (SAMPLE(REPLACE(STR(?clase_destino), "^.*[#/]", "")) AS ?clase_destino_label)
@@ -154,6 +156,7 @@ def generar_json_dataset(selected_dataset):
             print(f"Error en {key}: {e}")
             data[key] = []
     
+    # Guardar el JSON
     try:
         # Nombre del JSON del dataset
         json_path = os.path.join(JSON_DIR, f"{selected_dataset}.json")

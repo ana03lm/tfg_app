@@ -149,6 +149,11 @@ button:hover {
   background: #0056b3;
 }
 
+select {
+  padding: 5px;
+  margin: 5px;
+}
+
 /* Formulario de consulta */
 .consulta-form {
   width: 90%;
@@ -217,7 +222,6 @@ button:hover {
   overflow-y: scroll;
   padding-bottom: 20px;
 } 
-
 
 /* Botón de actualización */
 .update-form {
@@ -395,6 +399,16 @@ tr:nth-child(even) {
 
 .filtros:not(.oculto) {
   display: block;
+}
+
+#uri_instancia {
+  display: block;
+  font-size: 14px;
+  color: #555;
+  text-align: center; 
+  margin-top: 5px; 
+  font-style: italic; 
+  margin-bottom: 25px;
 }
 
 

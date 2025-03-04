@@ -81,13 +81,13 @@
     </div>
 
     <div class="grafico-contenedor">
-        <h2>Aparición de las propiedades en cada clase</h2>
-        <div class="grafico" id="heatmap_propiedades_clases"></div>
+        <h2>Relaciones entre instancias de las clases</h2>
+        <div class="grafico" id="heatmap_instancias_clases"></div>
     </div>
 
     <div class="grafico-contenedor">
-        <h2>Relaciones entre instancias de las clases</h2>
-        <div class="grafico" id="heatmap_instancias_clases"></div>
+        <h2>Aparición de las propiedades en cada clase</h2>
+        <div class="grafico" id="heatmap_propiedades_clases"></div>
     </div>
 
     <!--Referencia a Plotly.js-->
@@ -138,47 +138,51 @@
         // HEATMAP PROPIEDADES Y CLASES
         // Transformación JSON para heatmaps
         var propiedades_clases = JSON.parse('{{ relacion_propiedades_clases|default:"[]"|escapejs }}');
-       
-        // Construcción de los datos
-        let clasesUnicas = [...new Set(propiedades_clases.map(r => r[0]))]; // Se seleccionan las clases únicas. Con new set se genera un conjunto para que no se repitan los labels
-        let propiedadesUnicas = [...new Set(propiedades_clases.map(r => r[1]))]; // Propiedades únicas
-        let matrizZ = clasesUnicas.map(() => new Array(propiedadesUnicas.length).fill(0)); // Crear una matriz Z inicializada en 0. Aquí se añadirán los valores de la relación
-        // Rellenar la matriz Z con los valores 
+
+        // Extraer las clases y propiedades en el orden en que aparecen en el JSON (de mayor a menor)
+        let clasesUnicas = [...new Map(propiedades_clases.map(r => [r[0], r[0]])).values()];
+        let propiedadesUnicas = [...new Map(propiedades_clases.map(r => [r[1], r[1]])).values()];
+        // Crear matriz Z vacía 
+        let matrizZ = clasesUnicas.map(() => new Array(propiedadesUnicas.length).fill(0));
+
+        // Rellenar matriz Z con valores ordenados
         propiedades_clases.forEach(r => {
-            let claseIndex = clasesUnicas.indexOf(r[0]); // Se va almacenando el índice de clases y propiedades para asignar la posición
+            let claseIndex = clasesUnicas.indexOf(r[0]);
             let propiedadIndex = propiedadesUnicas.indexOf(r[1]);
-            matrizZ[claseIndex][propiedadIndex] = r[2]; // Asigna el número de ocurrencias de la propiedad en la clase
+            matrizZ[claseIndex][propiedadIndex] = r[2]; // Asigna el número de ocurrencias
         });
 
-        // Graficar el heatmap
+        // Graficar el heatmap asegurando que lo más frecuente aparece arriba a la izquierda
         Plotly.newPlot('heatmap_propiedades_clases', [{
-            x: propiedadesUnicas,
-            y: clasesUnicas,
-            z: matrizZ,
+            x: propiedadesUnicas,  // Dejamos el orden original para que los más frecuentes queden a la izquierda
+            y: clasesUnicas.reverse(),  // Invertimos solo el eje Y para que los más frecuentes estén arriba
+            z: matrizZ.reverse(), // Invertimos las filas para que el orden se mantenga
             type: 'heatmap',
             colorscale: 'Jet',
             hoverongaps: false
         }], layoutHeatMap, config);
 
+
         // HEATMAP RELACIONES CLASES
-        // Transformación JSON
         var relaciones_clases = JSON.parse('{{ relacion_instancias_clases|default:"[]"|escapejs }}');
-        // Extraer clases únicas
-        let clasesOrigenDestino = [...new Set(relaciones_clases.flatMap(r => [r[0], r[1]]))];
+
+        // Extraer clases 
+        let clasesOrigenDestino = [...new Map(relaciones_clases.flatMap(r => [[r[0], r[0]], [r[1], r[1]]])).values()];
         // Crear matriz Z vacía
-        let matrizZClases = clasesOrigenDestino.map(() => new Array(relaciones_clases.length).fill(0)); // Crear una matriz Z inicializada en 0. Aquí se añadirán los valores de la relación
-        // Rellenar la matriz Z con los valores 
+        let matrizZClases = clasesOrigenDestino.map(() => new Array(clasesOrigenDestino.length).fill(0));
+
+        // Rellenar matriz Z con valores ordenados
         relaciones_clases.forEach(r => {
             let claseOrigen = clasesOrigenDestino.indexOf(r[0]);
             let claseDestino = clasesOrigenDestino.indexOf(r[1]);
             matrizZClases[claseOrigen][claseDestino] = r[2]; // Número total de relaciones
         });
 
-        // Graficar el heatmap
+        // Graficar el heatmap asegurando que lo más frecuente aparece arriba a la izquierda
         Plotly.newPlot('heatmap_instancias_clases', [{
-            x: clasesOrigenDestino,
-            y: clasesOrigenDestino,
-            z: matrizZClases,
+            x: clasesOrigenDestino,  
+            y: clasesOrigenDestino.reverse(), 
+            z: matrizZClases.reverse(),  
             type: 'heatmap',
             colorscale: 'Jet',
             hoverongaps: false
