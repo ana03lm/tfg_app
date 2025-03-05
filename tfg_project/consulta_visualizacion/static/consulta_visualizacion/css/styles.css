@@ -373,44 +373,85 @@ tr:nth-child(even) {
   background: #2980b9;
 }
 
-/* Ocultar/mostrar filtros */
-.filtros {
-  display: none;
-  background: #f9f9f9;
-  padding: 15px;
-  border-radius: 5px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  margin-top: 10px;
+/* Filtros de la página de clase*/
+
+/* Contenedor para total e icono de filtrado */
+.items-instancias {
+  display: flex;
+  align-items: center;
+  justify-content: right;
+  padding-bottom: 10px;
 }
 
-.filtro-toggle button {
+.total-instancias {
+  font-size: 18px;
+  font-weight: bold;
+  color: #a00;
+  padding-right: 25px;
+}
+
+/* Icono de filtro */
+.filtro-icono img {
+  width: 30px;
+  height: auto;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.filtro-icono img:hover {
+  transform: scale(1.2);
+}
+
+/* Panel lateral de filtros */
+.filtros-lateral {
+  position: fixed;
+  top: 0;
+  right: -300px;
+  width: 270px;
+  height: 100%;
+  background: #f9f9f9;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  transition: right 0.3s ease-in-out;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.filtros-lateral:not(.oculto) {
+  right: 0;
+}
+
+/* Botón para cerrar el panel */
+.cerrar-filtros img {
+  width: 30px;
+  cursor: pointer;
+  float: right;
+  margin-bottom: 10px;
+}
+
+/* Botones y campos dentro del panel */
+.filtros-lateral input,
+.filtros-lateral select,
+.filtros-lateral button {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.filtros-lateral button {
   background: #007bff;
   color: white;
-  border: none;
-  padding: 8px 12px;
-  font-size: 16px;
+  font-weight: bold;
   cursor: pointer;
-  border-radius: 5px;
+  transition: background 0.3s ease;
 }
 
-.filtro-toggle button:hover {
+.filtros-lateral button:hover {
   background: #0056b3;
 }
-
-.filtros:not(.oculto) {
-  display: block;
-}
-
-#uri_instancia {
-  display: block;
-  font-size: 14px;
-  color: #555;
-  text-align: center; 
-  margin-top: 5px; 
-  font-style: italic; 
-  margin-bottom: 25px;
-}
-
 
 /* Estilos para mejorar la apariencia en móviles */
 @media (max-width: 800px) {
@@ -439,4 +480,13 @@ tr:nth-child(even) {
     width: 50%;  /* Hace que el botón sea más ancho */
     max-width: 300px; /* Limita el ancho del botón */
 }
+
+.filtros-lateral {
+  width: 200px;
+}
+
+.filtro-icono {
+  margin-top: 10px;
+}
+
 }

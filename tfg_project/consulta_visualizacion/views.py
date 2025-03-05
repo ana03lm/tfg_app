@@ -5,7 +5,7 @@ from django.http import JsonResponse, HttpResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import os
 import urllib.parse
-# from rdflib import Graph, URIRef, Literal, Namespace, RDF
+from rdflib import Graph, URIRef, Literal, Namespace, RDF
 import requests
 import json
 import csv
@@ -179,9 +179,11 @@ def explorar_clase(request, clase):
 
     sparql = SPARQLQuery(selected_dataset)
     
-    # Obtener la URI real de la clase a partir del JSON del dataset
+    # Obtener datos del JSON
     dataset_data = utils.cargar_json_dataset(selected_dataset)
     clases_dict = dataset_data.get("clases", {}) if dataset_data else {}
+     
+    # La uri de la clase que se solicita en la página para generarla correctamente
     uri_real_clase = clases_dict.get(clase, None)
     # Si la clase no está en el dataset, se devuelve la vista sin datos
     if not uri_real_clase:
@@ -308,7 +310,10 @@ def explorar_clase(request, clase):
         "filtro_sujeto": filtro_sujeto,
         "filtro_propiedad": filtro_propiedad,
         "filtro_objeto": filtro_objeto,
-        "modo_filtro": modo_filtro
+        "modo_filtro": modo_filtro,
+        # Se pasan las clases y propiedades del dataset para el filtrado
+        "clases_disponibles": list(clases_dict.keys()),
+        "propiedades_disponibles": list(propiedades.keys()),
     })
 
 
@@ -471,16 +476,6 @@ def consulta_sparql(request):
     })
 
 # ---
-#  Intenta extraer el espacio de nombres del dataset a partir de los resultados SPARQL
-# def obtener_espacio_nombres(resultados):
-#     for fila in resultados:
-#         for var, valor_dict in fila.items():
-#             valor = valor_dict.get("value", "")
-#             if valor.startswith("http"):  # Buscar una URI válida en los datos
-#                 namespace = valor.rsplit("/", 1)[0] + "/"  # Obtener el namespace base
-#                 return Namespace(namespace)  # Retornar el Namespace de rdflib
-#     return Namespace("http://default.org/")  # Valor por defecto si no se encuentra un namespace
-
 #  Vista para exportar resultados almacenados en la sesión en el formato seleccionado (CSV o TTL)
 def exportar_resultados_sparql(request):
     
@@ -507,37 +502,85 @@ def exportar_resultados_sparql(request):
             writer.writerow([fila.get(var, {}).get("value", "") for var in columnas])
         return response
 
-    # **Exportación a TTL (Turtle)**
-    # elif formato == "ttl":
-    #     g = Graph()
-    #     base_ns = "http://ejemplo.com/"  # Puedes cambiarlo según el dataset
-    #     ns = Namespace(base_ns)
-    #     g.bind("ex", ns)  # Asignar prefijo "ex" para las URIs
-
-    #     for fila in resultados:
-    #         # Asignar un sujeto a la primera URI encontrada en la fila
-    #         sujeto = None
-    #         for var in columnas:
-    #             if var in fila:
-    #                 valor = fila[var]["value"]
-
-    #                 # Si el valor es una URI, convertirlo en URIRef
-    #                 if valor.startswith("http"):
-    #                     nodo = URIRef(valor)
-    #                 else:
-    #                     nodo = Literal(valor)
-
-    #                 # La primera URI será el sujeto, el resto serán predicados-objetos
-    #                 if sujeto is None:
-    #                     sujeto = nodo
-    #                 else:
-    #                     g.add((sujeto, ns[var], nodo))  # Se asigna la relación en RDF
-
-    #     # Serializar y devolver el archivo TTL
-    #     response = HttpResponse(content_type="text/turtle")
-    #     response["Content-Disposition"] = 'attachment; filename="consulta_sparql.ttl"'
-    #     response.write(g.serialize(format="turtle"))
-
-    #     return response
-
     return HttpResponse("Formato no soportado.", status=400)
+
+# Genera una consulta SPARQL a partir de los filtros proporcionados por el usuario
+# Se utiliza tanto para filtrar instancias en explorar_clase, como para busqueda en lenguaje natural
+def busqueda(request, filtro_clase, filtro_sujeto, filtro_propiedad, filtro_objeto, modo_filtro, clases_dict=None, uri_real_clase=None):
+
+    selected_dataset = request.GET.get("dataset")
+    # Obtener datos del JSON
+    dataset_data = utils.cargar_json_dataset(selected_dataset)
+    clases_dict = dataset_data.get("clases", {}) if dataset_data else {}
+    propiedades_dict = dataset_data.get("propiedades", {}) if dataset_data else {}
+    
+    # Construcción de la consulta
+    # Base de la consulta
+    condiciones = ["?s ?p ?o"]  
+
+    # Si estamos explorando una clase específica (explorar_clase), la añadimos 
+    if uri_real_clase:
+        condiciones.append(f"?s a <{uri_real_clase}>")
+
+    # Aplicar filtros según los valores recibidos
+    if filtro_clase and clases_dict:
+        if filtro_clase in clases_dict.keys():
+            condiciones.append(f"?s a <{clases_dict[filtro_clase]}>")
+        if filtro_clase in clases_dict.values():
+            condiciones.append(f"?s a <{filtro_clase}>")
+
+    if filtro_sujeto:
+        condiciones.append(f'FILTER(CONTAINS(LCASE(STR(?s)), LCASE("{filtro_sujeto}")))')
+
+    if filtro_propiedad:
+        condiciones.append(f'FILTER(CONTAINS(LCASE(STR(?p)), LCASE("{filtro_propiedad}")))')
+
+    if filtro_objeto:
+        condiciones.append(f'FILTER(CONTAINS(LCASE(STR(?o)), LCASE("{filtro_objeto}")))')
+
+    # Construcción de consulta según el modo de filtrado
+    if modo_filtro == "AND":
+        query = f"""
+            SELECT DISTINCT ?s ?label WHERE {{
+                {' . '.join(condiciones)}
+                OPTIONAL {{ ?s ?anyPredicate ?label . FILTER(REGEX(STR(?anyPredicate), "label", "i")) }}
+            }}
+        """
+    else:  # Modo OR con subconsultas combinadas por UNION
+        condiciones_union = []
+
+        if filtro_clase and clases_dict:
+            if filtro_clase in clases_dict.keys():
+                condiciones_union.append(f'{{ ?s a <{clases_dict[filtro_clase]}> }}')
+            if filtro_clase in clases_dict.values():
+                condiciones_union.append(f'{{ ?s a <{filtro_clase}> }}')
+
+        if filtro_sujeto:
+            condiciones_union.append(f'{{ ?s ?p ?o . FILTER(CONTAINS(LCASE(STR(?s)), LCASE("{filtro_sujeto}"))) }}')
+
+        if filtro_propiedad:
+            condiciones_union.append(f'{{ ?s ?p ?o . FILTER(CONTAINS(LCASE(STR(?p)), LCASE("{filtro_propiedad}"))) }}')
+
+        if filtro_objeto:
+            condiciones_union.append(f'{{ ?s ?p ?o . FILTER(CONTAINS(LCASE(STR(?o)), LCASE("{filtro_objeto}"))) }}')
+
+        if condiciones_union:
+            query = f"""
+                SELECT DISTINCT ?s ?label WHERE {{
+                    {f' UNION '.join(condiciones_union)}
+                    OPTIONAL {{ ?s ?anyPredicate ?label . FILTER(REGEX(STR(?anyPredicate), "label", "i")) }}
+                }}
+            """
+        else:
+            # Si no hay filtros, obtener todas las instancias disponibles
+            query = """
+                SELECT DISTINCT ?s ?label WHERE {
+                    ?s ?p ?o .
+                    OPTIONAL { ?s ?anyPredicate ?label . FILTER(REGEX(STR(?anyPredicate), "label", "i")) }
+                }
+            """
+
+    return query
+
+
+           

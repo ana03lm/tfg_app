@@ -1,4 +1,5 @@
 {% extends "base_generic.html" %}
+{% load static %}
 
 {% block title %}
     <title>{{ clase }} | TFG</title>
@@ -26,50 +27,62 @@
 
     <!-- Sección de instancias con paginación -->
     <div class="info-card">
-        <h2>Listado de instancias. Total: {{ num_instancias }} </h2>
+        <!-- Contenedor de resultados -->
+        <div class="resultado-container"> 
+            <h2>Listado de instancias</h2>
 
-        {% if instancias %}
-            <!-- Botón para mostrar los filtros -->
-            <button id="toggleFiltros">⚙️ Filtros</button>
-
-            <!-- Contenedor de filtros (inicialmente oculto) -->
-            <div id="filtrosContainer" class="filtros oculto">
+            <div class="items-instancias">
+                <span class="total-instancias">Total: {{ num_instancias }}</span>
+                <!-- Icono de filtrado -->
+                <div id="toggleFiltros" class="filtro-icono"> <img src="{% static 'consulta_visualizacion/css/filtrar.png' %}" alt="Filtrar" height="30px"> </div>
+            </div>
+            
+            <!-- Contenedor lateral derecho para los filtros -->
+            <div id="filtrosContainer" class="filtros-lateral oculto">
+                <!--Botón cerrar-->
+                <div id="cerrarFiltros" class="cerrar-filtros"> <img src="{% static 'consulta_visualizacion/css/cerrar.png' %}" alt="Cerrar" height="30px"> </div>
+                <!--Campos de filtros-->
+                <h3>Filtros</h3>
                 <form method="GET">
                     <input type="hidden" name="dataset" value="{{ dataset }}">
                     <input type="hidden" name="clase" value="{{ clase }}">
-                
+                    <!--Desplegable para seleccionar modo de filtrado-->
                     <label for="modo_filtro">Modo de filtrado:</label>
                     <select name="modo_filtro" id="modo_filtro">
                         <option value="AND" {% if request.GET.modo_filtro == "AND" %}selected{% endif %}>Coincidir todos (AND)</option>
                         <option value="OR" {% if request.GET.modo_filtro == "OR" %}selected{% endif %}>Coincidir alguno (OR)</option>
                     </select>
-                    <p>
+
+                    <!-- Desplegable para seleccionar una clase -->
                     <label for="filtro_clase">Filtrar por Clase:</label>
-                    <input type="text" name="filtro_clase" id="filtro_clase" value="{{ request.GET.filtro_clase }}">
-                
+                    <select name="filtro_clase" id="filtro_clase">
+                        <option value="">Seleccione una clase</option>
+                        {% for clase in clases_disponibles %}
+                            <option value="{{ clase }}" {% if request.GET.filtro_clase == clase %}selected{% endif %}>{{ clase }}</option>
+                        {% endfor %}
+                    </select>
+
                     <label for="filtro_sujeto">Filtrar por Sujeto:</label>
                     <input type="text" name="filtro_sujeto" id="filtro_sujeto" value="{{ request.GET.filtro_sujeto }}">
-                
+
+                    <!-- Desplegable para seleccionar una propiedad -->
                     <label for="filtro_propiedad">Filtrar por Propiedad:</label>
-                    <input type="text" name="filtro_propiedad" id="filtro_propiedad" value="{{ request.GET.filtro_propiedad }}">
-                
+                    <select name="filtro_propiedad" id="filtro_propiedad">
+                        <option value="">Seleccione una propiedad</option>
+                        {% for propiedad in propiedades_disponibles %}
+                            <option value="{{ propiedad }}" {% if request.GET.filtro_propiedad == propiedad %}selected{% endif %}>{{ propiedad }}</option>
+                        {% endfor %}
+                    </select>
+
                     <label for="filtro_objeto">Filtrar por Objeto:</label>
                     <input type="text" name="filtro_objeto" id="filtro_objeto" value="{{ request.GET.filtro_objeto }}">
-                
+
                     <button type="submit">Aplicar Filtros</button>
                 </form>
-                
             </div>
 
-            <!-- JavaScript para manejar la visibilidad de los filtros -->
-            <script>
-                document.getElementById("toggleFiltros").addEventListener("click", function() {
-                    var filtros = document.getElementById("filtrosContainer");
-                    filtros.classList.toggle("oculto");
-                });
-            </script>
-
-            <!--Mostrar instancias-->
+            <!--Listado de instancias-->
+            {% if instancias %}
             <ul>
                 {% for instancia in instancias %}
                     <li><a href="{% url 'visualizar_instancia' %}?dataset={{ dataset }}&uri={{ instancia.uri|urlencode }}&nombre={{instancia.nombre|urlencode}}">
@@ -92,14 +105,55 @@
                 {% endif %}
             </div>
 
-        {% else %}
-            <p>No hay instancias de esta clase en el dataset.</p>
-        {% endif %}
+            {% else %}
+                <p>No hay instancias de esta clase en el dataset.</p>
+            {% endif %}
 
+        </div>
     </div>
-
-    <!-- Botón para volver -->
-    <a href="{% url 'index' %}?dataset={{ dataset }}" class="back-button">⬅ Volver al Dashboard </a>
 </div>
+
+<!--Referencia a select2 para generar los desplegables de los filtros-->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+<!-- JavaScript para manejar la visibilidad de los filtros -->
+<script>
+    // Abrir filtros
+    document.getElementById("toggleFiltros").addEventListener("click", function() {
+        var filtros = document.getElementById("filtrosContainer");
+        filtros.classList.toggle("oculto");
+    });
+    
+    // Cerrar filtros con botón
+    document.getElementById("cerrarFiltros").addEventListener("click", function() {
+        var filtros = document.getElementById("filtrosContainer");
+        filtros.classList.add("oculto");
+    });
+
+    // Cerrar filtros si se hace clic fuera de la barra lateral
+    document.addEventListener("click", function(event) {
+        var filtros = document.getElementById("filtrosContainer");
+        var toggleBtn = document.getElementById("toggleFiltros");
+
+        if (!filtros.contains(event.target) && !toggleBtn.contains(event.target)) {
+            filtros.classList.add("oculto");
+        }
+    });
+    
+    // Inicializar Select2 en los desplegables
+    $(document).ready(function() {
+        $('#filtro_clase').select2({
+            placeholder: "Seleccione una clase",
+            allowClear: true,
+            width: '100%'
+        });
+
+        $('#filtro_propiedad').select2({
+            placeholder: "Seleccione una propiedad",
+            allowClear: true,
+            width: '100%'
+        });
+    });
+</script>
+
 {% endblock %}
 
