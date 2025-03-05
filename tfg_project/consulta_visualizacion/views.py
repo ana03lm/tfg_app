@@ -5,7 +5,7 @@ from django.http import JsonResponse, HttpResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import os
 import urllib.parse
-from rdflib import Graph, URIRef, Literal, Namespace, RDF
+# from rdflib import Graph, URIRef, Literal, Namespace, RDF
 import requests
 import json
 import csv
@@ -179,14 +179,15 @@ def explorar_clase(request, clase):
 
     sparql = SPARQLQuery(selected_dataset)
     
-    # Obtener la correspondencia entre la clase solicitada y la URI del dataset a partir del JSON
+    # Obtener la URI real de la clase a partir del JSON del dataset
     dataset_data = utils.cargar_json_dataset(selected_dataset)
     clases_dict = dataset_data.get("clases", {}) if dataset_data else {}
     uri_real_clase = clases_dict.get(clase, None)
+    # Si la clase no está en el dataset, se devuelve la vista sin datos
     if not uri_real_clase:
         return render(request, "explorar_clase.html", {"clase": clase, "propiedades": [], "instancias": [], "dataset": selected_dataset})
 
-    # Consulta SPARQL para obtener las propiedades utilizadas por la clase con su label, si lo tiene
+    # Consulta SPARQL para obtener las propiedades utilizadas por la clase y su frecuencia de uso
     query_propiedades = f"""
         SELECT DISTINCT ?propiedad (COUNT(?propiedad) AS ?num_propiedad) WHERE {{
             ?s a <{uri_real_clase}> ;
@@ -196,45 +197,81 @@ def explorar_clase(request, clase):
 
     # Obtener filtros desde la URL
     filtro_clase = request.GET.get("filtro_clase", "").strip()
+    filtro_sujeto = request.GET.get("filtro_sujeto", "").strip()
     filtro_propiedad = request.GET.get("filtro_propiedad", "").strip()
-    filtro_valor = request.GET.get("filtro_valor", "").strip()
+    filtro_objeto = request.GET.get("filtro_objeto", "").strip()
+    modo_filtro = request.GET.get("modo_filtro", "AND")  # Por defecto AND
     
     # Construcción de la consulta SPARQL con filtros
-    query_instancias = f"""
-        SELECT DISTINCT ?instancia ?label WHERE {{
-            ?instancia a <{uri_real_clase}> .
-    """
-    
-    # Aplicar filtro de clase si está definido
-    if filtro_clase:
-        # Si el usuario pone en el filtro el label de la clase
-        if filtro_clase in clases_dict.keys():
-            query_instancias += f" ?instancia a <{clases_dict[filtro_clase]}> . "
-        # Si el usuario pone en el filtro la URI de la clase
-        if filtro_clase in clases_dict.values():
-            query_instancias += f" ?instancia a <{filtro_clase}> . "
+    # Si el modo del filtro es AND, se combinan los filtros
+    if modo_filtro == "AND":
+        # Estructura base. Se filtran solo instancias que pertenezcan a la clase solicitada
+        condiciones = ["?s ?p ?o", f"?s a <{uri_real_clase}>"]
+
+        # Si hay valores en los filtros, se van añadiendo en las condiciones.
+        # Para ello se utilizan los filtros SPARQL, que filtrarán el parámetro por el valor insertado por el usuario con CONTAINS y LCASE 
+        # Esto permite un filtrado más intuitivo y más cercano al lenguaje natural
+        if filtro_clase:
+            if filtro_clase in clases_dict.keys():
+                condiciones.append(f"?s a <{clases_dict[filtro_clase]}>")
+            if filtro_clase in clases_dict.values():
+                condiciones.append(f"?s a <{filtro_clase}>")
+
+        if filtro_sujeto:
+            condiciones.append(f'FILTER(CONTAINS(LCASE(STR(?s)), LCASE("{filtro_sujeto}")))')
             
-    # Aplicar filtro de propiedad si está definido
-    if filtro_propiedad:
-        query_instancias += f" OPTIONAL {{ ?instancia <{filtro_propiedad}> ?o . }} "
-        
-    # Aplicar filtro de valor si está definido
-    if filtro_valor:
-        query_instancias += f"""
-            FILTER EXISTS {{
-                ?instancia ?propiedad ?valor .
-                FILTER(CONTAINS(LCASE(STR(?valor)), LCASE("{filtro_valor}")))
+        if filtro_propiedad:
+            condiciones.append(f'FILTER(CONTAINS(LCASE(STR(?p)), LCASE("{filtro_propiedad}")))')
+            
+        if filtro_objeto:
+            condiciones.append(f'FILTER(CONTAINS(LCASE(STR(?o)), LCASE("{filtro_objeto}")))')
+
+        # Generación de la consulta AND: todas las condiciones deben cumplirse. También se recuperan labels si los hay
+        query_instancias = f"""
+            SELECT DISTINCT ?s ?label WHERE {{
+                {' . '.join(condiciones)}
+                OPTIONAL {{ ?s ?anyPredicate ?label . FILTER(REGEX(STR(?anyPredicate), "label", "i")) }}
             }}
         """
+    # Si el modo es or, al menos una de las condiciones debe cumplirse
+    else:  
+        # Se construyen de nuevo las condiciones, pero esta vez se harán subconsultas
+        condiciones_union = []
+        # En este caso, se agregan subconsultas para cada filtro definido
+        if filtro_clase:
+            if filtro_clase in clases_dict.keys():
+                condiciones_union.append(f'{{ ?s a <{clases_dict[filtro_clase]}> }}')
+            if filtro_clase in clases_dict.values():
+                condiciones_union.append(f'{{ ?s a <{filtro_clase}> }}')
+                
+        if filtro_sujeto:
+            condiciones_union.append(f'{{ ?s ?p ?o . FILTER(CONTAINS(LCASE(STR(?s)), LCASE("{filtro_sujeto}"))) }}')
 
-    # Añadir búsqueda de labels
-    query_instancias += """
-        OPTIONAL { 
-            ?instancia ?anyPredicate ?label .
-            FILTER(REGEX(STR(?anyPredicate), "label", "i"))  
-        }
-    }
-    """
+        if filtro_propiedad:
+            condiciones_union.append(f'{{ ?s ?p ?o . FILTER(CONTAINS(LCASE(STR(?p)), LCASE("{filtro_propiedad}"))) }}')
+
+        if filtro_objeto:
+            condiciones_union.append(f'{{ ?s ?p ?o . FILTER(CONTAINS(LCASE(STR(?o)), LCASE("{filtro_objeto}"))) }}')
+
+        # Se construye la consulta combinando las subconsultas con UNION
+        # Asegurar que hay al menos una condición para evitar un UNION vacío
+        if condiciones_union:
+            # Se asegura que las instancias pertenecen a la clase de la página visitada
+            query_instancias = f"""
+                SELECT DISTINCT ?s ?label WHERE {{
+                    ?s a <{uri_real_clase}> . 
+                    {f' UNION '.join(condiciones_union)}
+                    OPTIONAL {{ ?s ?anyPredicate ?label . FILTER(REGEX(STR(?anyPredicate), "label", "i")) }}
+                }}
+            """
+        else:
+            # Si no hay filtros, simplemente se recuperan todas las instancias de la clase
+            query_instancias = f"""
+                SELECT DISTINCT ?s ?label WHERE {{
+                    ?s a <{uri_real_clase}> .
+                    OPTIONAL {{ ?s ?anyPredicate ?label . FILTER(REGEX(STR(?anyPredicate), "label", "i")) }}
+                }}
+            """
 
     # Ejecutamos las consultas
     resultado_propiedades = sparql.ejecutar_consulta(query_propiedades)
@@ -248,14 +285,14 @@ def explorar_clase(request, clase):
     instancias = []
     for res in resultado_instancias["results"]["bindings"]:
         label = res.get("label", {}).get("value", "").strip()  # Obtener label si existe
-        uri = res["instancia"]["value"]  # URI de la instancia
+        uri = res["s"]["value"]  # URI de la instancia
         nombre_mostrado = label if label else utils.obtener_nombre_uri(uri)  # Si hay label, se usa; si no, se extrae el nombre de la URI
         instancias.append({"uri": uri, "nombre": nombre_mostrado})
 
-    # Contar el total de instancias obtenidas de la consulta SPARQL
+    # Contar el total de instancias obtenidas
     num_instancias = len(instancias) 
     
-    # Paginación de instancias
+    # Paginación de instancias (20 por página)
     paginator = Paginator(instancias, 20)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
@@ -266,9 +303,12 @@ def explorar_clase(request, clase):
         "instancias": page_obj,
         "num_instancias": num_instancias,
         "dataset": selected_dataset,
+        # Se pasan los filtros para mantenerlos en la plantilla
         "filtro_clase": filtro_clase,
+        "filtro_sujeto": filtro_sujeto,
         "filtro_propiedad": filtro_propiedad,
-        "filtro_valor": filtro_valor
+        "filtro_objeto": filtro_objeto,
+        "modo_filtro": modo_filtro
     })
 
 

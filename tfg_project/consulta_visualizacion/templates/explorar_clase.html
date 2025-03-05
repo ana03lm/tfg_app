@@ -37,18 +37,28 @@
                 <form method="GET">
                     <input type="hidden" name="dataset" value="{{ dataset }}">
                     <input type="hidden" name="clase" value="{{ clase }}">
-
-                    <label for="filtro_clase">Filtrar por Subclase:</label>
+                
+                    <label for="modo_filtro">Modo de filtrado:</label>
+                    <select name="modo_filtro" id="modo_filtro">
+                        <option value="AND" {% if request.GET.modo_filtro == "AND" %}selected{% endif %}>Coincidir todos (AND)</option>
+                        <option value="OR" {% if request.GET.modo_filtro == "OR" %}selected{% endif %}>Coincidir alguno (OR)</option>
+                    </select>
+                    <p>
+                    <label for="filtro_clase">Filtrar por Clase:</label>
                     <input type="text" name="filtro_clase" id="filtro_clase" value="{{ request.GET.filtro_clase }}">
-
+                
+                    <label for="filtro_sujeto">Filtrar por Sujeto:</label>
+                    <input type="text" name="filtro_sujeto" id="filtro_sujeto" value="{{ request.GET.filtro_sujeto }}">
+                
                     <label for="filtro_propiedad">Filtrar por Propiedad:</label>
                     <input type="text" name="filtro_propiedad" id="filtro_propiedad" value="{{ request.GET.filtro_propiedad }}">
-
-                    <label for="filtro_valor">Filtrar por Valor:</label>
-                    <input type="text" name="filtro_valor" id="filtro_valor" value="{{ request.GET.filtro_valor }}">
-
+                
+                    <label for="filtro_objeto">Filtrar por Objeto:</label>
+                    <input type="text" name="filtro_objeto" id="filtro_objeto" value="{{ request.GET.filtro_objeto }}">
+                
                     <button type="submit">Aplicar Filtros</button>
                 </form>
+                
             </div>
 
             <!-- JavaScript para manejar la visibilidad de los filtros -->
