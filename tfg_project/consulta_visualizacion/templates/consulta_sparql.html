@@ -11,7 +11,7 @@
     <h1>Consulta de Datos SPARQL</h1>
 
     <!--Formulario consulta-->
-    <form method="POST" class="consulta-form">
+    <form method="POST" id="consulta-form">
         {% csrf_token %}
         <label for="consulta_sparql">Introduce tu consulta SPARQL:</label>
         <textarea name="consulta_sparql" id="consulta_sparql" rows="6"> {{ ultima_consulta }}</textarea>
@@ -34,9 +34,11 @@
                 <label for="formato">Selecciona el formato:</label>
                 <select name="formato" id="formato">
                     <option value="csv"> CSV</option>
-                    {% comment %} <option value="ttl">Turtle (TTL)</option> {% endcomment %}
+                    <option value="tsv">TSV </option>
+                    <option value="json">JSON </option>
+
                 </select>
-                <button type="submit">Descargar</button>
+                <button type="submit">Exportar</button>
             </form>
            
 

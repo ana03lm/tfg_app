@@ -1,11 +1,10 @@
-from .sparql_query import SPARQLQuery  # Importamos la clase para consultas SPARQL
+from .sparql_query import SPARQLQuery 
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.http import JsonResponse, HttpResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import os
 import urllib.parse
-from rdflib import Graph, URIRef, Literal, Namespace, RDF
 import requests
 import json
 import csv
@@ -70,7 +69,7 @@ def upload_rdf(request):
                 }
             )
 
-            # Códigos de respuesta. 
+            # Códigos de respuesta 
             # Si está todo bien se lleva a la página de generación de json
             if response.status_code in [200, 201]:
                 return redirect(reverse("vista_generar_json") + f"?dataset={dataset_name}")
@@ -126,17 +125,31 @@ def index(request):
 
 # ---
 # GESTIÓN DEL JSON
-# Función para generar JSON en segundo plano
+# Función para generar JSON en segundo plano e imprimir mensajes de progreso
 def generar_json_en_segundo_plano(dataset):
-    # Se crea un archivo temporal para detectar cuando empieza y acaba la generación
+    # Ruta del archivo de estado
     estado_path = os.path.join("json_cache", f"{dataset}_generando.json")
-    with open(estado_path, "w") as f:
-        f.write("generando")
-    
-    # Generar el JSON
-    utils.generar_json_dataset(dataset)
 
-    # Eliminar el archivo de estado una vez terminado
+    # Función para escribir mensajes en el archivo de estado
+    def actualizar_estado(mensaje):
+        with open(estado_path, "w") as f:
+            f.write(mensaje)
+
+    # Crear archivo con el mensaje inicial
+    actualizar_estado("Iniciando la generación del dataset...")
+
+    # Generar el JSON, que utiliza la función actualizar_estado para imprimir mensajes en cada paso
+    try:
+        actualizar_estado("Obteniendo métricas generales...")
+        utils.generar_json_dataset(dataset, actualizar_estado)
+        # Si la generación del JSON termina con éxito, se actualiza el estado a "Generación completada"
+        actualizar_estado("Generación completada.")
+    except Exception as e:
+        # Si ocurre un error durante la generación del JSON, el archivo de estado se actualiza con el mensaje de error
+        # Esto permite mostrar el error en la pantalla en lugar de esperar indefinidamente
+        actualizar_estado(f"Error en la generación: {str(e)}")
+
+    # Eliminar archivo de estado cuando termine
     if os.path.exists(estado_path):
         os.remove(estado_path)
 
@@ -155,19 +168,29 @@ def vista_generar_json(request):
 
     return redirect("index")  # Si no hay dataset, redirige al inicio
 
-# Verificar si existe el JSON de estado o no para controlar la carga y la redirección a index
+# Comprueba el estado de la generación del JSON del dataset y devuelve el estado actual para controlar la pantalla de carga y los mensajes de progreso
 def verificar_json(request):
+    # Obtiene el dataset que se procesa 
     selected_dataset = request.GET.get("dataset")
     if not selected_dataset:
         return JsonResponse({"exists": False, "generating": False})
 
-    json_path = os.path.join("json_cache", f"{selected_dataset}.json")
-    estado_path = os.path.join("json_cache", f"{selected_dataset}_generando.json")
+    json_path = os.path.join("json_cache", f"{selected_dataset}.json") #Ruta del archivo JSON del dataset
+    estado_path = os.path.join("json_cache", f"{selected_dataset}_generando.json") #Ruta del archivo de estado sobre la generación del JSON anterior
 
+    # Comprueba si existen los archivos anteriores para detectar si ha finalizado el proceso o no y redirigir a index
     json_existe = os.path.exists(json_path)
-    json_generando = os.path.exists(estado_path)
+    json_generando = os.path.exists(estado_path) 
 
-    return JsonResponse({"exists": json_existe, "generating": json_generando})
+    # Obtiene el mensaje de progreso
+    progreso = "Generando datos..." #Mensaje por defecto
+    # Si el archivo de estado existe, se lee su contenido y se usa como el mensaje real de progreso
+    if json_generando:
+        with open(estado_path, "r") as f:
+            progreso = f.read().strip()
+
+    # Devuelve un JSON con el estado y el progreso 
+    return JsonResponse({"exists": json_existe, "generating": json_generando, "progress": progreso})
 
 
 # ---
@@ -204,76 +227,8 @@ def explorar_clase(request, clase):
     filtro_objeto = request.GET.get("filtro_objeto", "").strip()
     modo_filtro = request.GET.get("modo_filtro", "AND")  # Por defecto AND
     
-    # Construcción de la consulta SPARQL con filtros
-    # Si el modo del filtro es AND, se combinan los filtros
-    if modo_filtro == "AND":
-        # Estructura base. Se filtran solo instancias que pertenezcan a la clase solicitada
-        condiciones = ["?s ?p ?o", f"?s a <{uri_real_clase}>"]
-
-        # Si hay valores en los filtros, se van añadiendo en las condiciones.
-        # Para ello se utilizan los filtros SPARQL, que filtrarán el parámetro por el valor insertado por el usuario con CONTAINS y LCASE 
-        # Esto permite un filtrado más intuitivo y más cercano al lenguaje natural
-        if filtro_clase:
-            if filtro_clase in clases_dict.keys():
-                condiciones.append(f"?s a <{clases_dict[filtro_clase]}>")
-            if filtro_clase in clases_dict.values():
-                condiciones.append(f"?s a <{filtro_clase}>")
-
-        if filtro_sujeto:
-            condiciones.append(f'FILTER(CONTAINS(LCASE(STR(?s)), LCASE("{filtro_sujeto}")))')
-            
-        if filtro_propiedad:
-            condiciones.append(f'FILTER(CONTAINS(LCASE(STR(?p)), LCASE("{filtro_propiedad}")))')
-            
-        if filtro_objeto:
-            condiciones.append(f'FILTER(CONTAINS(LCASE(STR(?o)), LCASE("{filtro_objeto}")))')
-
-        # Generación de la consulta AND: todas las condiciones deben cumplirse. También se recuperan labels si los hay
-        query_instancias = f"""
-            SELECT DISTINCT ?s ?label WHERE {{
-                {' . '.join(condiciones)}
-                OPTIONAL {{ ?s ?anyPredicate ?label . FILTER(REGEX(STR(?anyPredicate), "label", "i")) }}
-            }}
-        """
-    # Si el modo es or, al menos una de las condiciones debe cumplirse
-    else:  
-        # Se construyen de nuevo las condiciones, pero esta vez se harán subconsultas
-        condiciones_union = []
-        # En este caso, se agregan subconsultas para cada filtro definido
-        if filtro_clase:
-            if filtro_clase in clases_dict.keys():
-                condiciones_union.append(f'{{ ?s a <{clases_dict[filtro_clase]}> }}')
-            if filtro_clase in clases_dict.values():
-                condiciones_union.append(f'{{ ?s a <{filtro_clase}> }}')
-                
-        if filtro_sujeto:
-            condiciones_union.append(f'{{ ?s ?p ?o . FILTER(CONTAINS(LCASE(STR(?s)), LCASE("{filtro_sujeto}"))) }}')
-
-        if filtro_propiedad:
-            condiciones_union.append(f'{{ ?s ?p ?o . FILTER(CONTAINS(LCASE(STR(?p)), LCASE("{filtro_propiedad}"))) }}')
-
-        if filtro_objeto:
-            condiciones_union.append(f'{{ ?s ?p ?o . FILTER(CONTAINS(LCASE(STR(?o)), LCASE("{filtro_objeto}"))) }}')
-
-        # Se construye la consulta combinando las subconsultas con UNION
-        # Asegurar que hay al menos una condición para evitar un UNION vacío
-        if condiciones_union:
-            # Se asegura que las instancias pertenecen a la clase de la página visitada
-            query_instancias = f"""
-                SELECT DISTINCT ?s ?label WHERE {{
-                    ?s a <{uri_real_clase}> . 
-                    {f' UNION '.join(condiciones_union)}
-                    OPTIONAL {{ ?s ?anyPredicate ?label . FILTER(REGEX(STR(?anyPredicate), "label", "i")) }}
-                }}
-            """
-        else:
-            # Si no hay filtros, simplemente se recuperan todas las instancias de la clase
-            query_instancias = f"""
-                SELECT DISTINCT ?s ?label WHERE {{
-                    ?s a <{uri_real_clase}> .
-                    OPTIONAL {{ ?s ?anyPredicate ?label . FILTER(REGEX(STR(?anyPredicate), "label", "i")) }}
-                }}
-            """
+    # Generar la consulta SPARQL para mostrar las instancias
+    query_instancias = utils.busqueda( filtro_clase, filtro_sujeto, filtro_propiedad, filtro_objeto, modo_filtro, clases_dict, uri_real_clase )
 
     # Ejecutamos las consultas
     resultado_propiedades = sparql.ejecutar_consulta(query_propiedades)
@@ -295,16 +250,19 @@ def explorar_clase(request, clase):
     num_instancias = len(instancias) 
     
     # Paginación de instancias (20 por página)
-    paginator = Paginator(instancias, 20)
+    paginator = Paginator(instancias, 20)  # Número de elementos por página
     page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-
+    try:
+        page_obj = paginator.get_page(page_number)
+    except (PageNotAnInteger, EmptyPage):
+        page_obj = paginator.get_page(1)  # Si la página no es válida, redirigir a la primera
+        
     return render(request, "explorar_clase.html", {
+        "dataset": selected_dataset,
         "clase": clase,
         "propiedades": propiedades,
         "instancias": page_obj,
         "num_instancias": num_instancias,
-        "dataset": selected_dataset,
         # Se pasan los filtros para mantenerlos en la plantilla
         "filtro_clase": filtro_clase,
         "filtro_sujeto": filtro_sujeto,
@@ -313,7 +271,7 @@ def explorar_clase(request, clase):
         "modo_filtro": modo_filtro,
         # Se pasan las clases y propiedades del dataset para el filtrado
         "clases_disponibles": list(clases_dict.keys()),
-        "propiedades_disponibles": list(propiedades.keys()),
+        "propiedades_disponibles": sorted(list(propiedades.keys())),
     })
 
 
@@ -355,7 +313,7 @@ def visualizar_instancia(request):
     """
     resultado_detalles = sparql.ejecutar_consulta(query_detalles)
 
-    # Recuperar las clases del JSON
+    # Recuperar las clases del JSON para visualizar los valores correctamente
     dataset_data = utils.cargar_json_dataset(selected_dataset)
     clases_dict = dataset_data.get("clases", {}) if dataset_data else {}
 
@@ -432,7 +390,7 @@ def consulta_sparql(request):
             return redirect(f"{request.path}?dataset={selected_dataset}&page=1")  # Redirigir a la primera página
         else:
             request.session.pop("ultima_consulta", None)  # Eliminar si no hay consulta
-    # Si el usuario está navegando entre páginas (GET con ?page), recuperar la consulta de la sesión
+    # Si el usuario está navegando entre páginas (GET con ?page), recuperar la consulta de la sesión para mostrarla siempre
     elif "page" in request.GET and "ultima_consulta" in request.session:
         consulta = request.session["ultima_consulta"]
         consulta_realizada = True
@@ -475,8 +433,7 @@ def consulta_sparql(request):
         "num_resultados": num_resultados
     })
 
-# ---
-#  Vista para exportar resultados almacenados en la sesión en el formato seleccionado (CSV o TTL)
+#  Vista para exportar resultados almacenados en la sesión en el formato seleccionado (CSV, JSON o TSV )
 def exportar_resultados_sparql(request):
     
     formato = request.GET.get("formato", "csv").strip()  # Formato de exportación (por defecto, CSV)
@@ -491,96 +448,109 @@ def exportar_resultados_sparql(request):
 
     # Exportar como CSV
     if formato == "csv":
-        # Creación de respuesta en forma de archivo descargable csv
+        # Se crea una respuesta HTTP con el tipo de contenido correspondiente a CSV
         response = HttpResponse(content_type="text/csv") 
+        # Se define el encabezado para forzar la descarga del archivo con nombre específico
         response["Content-Disposition"] = 'attachment; filename="consulta_sparql.csv"'
         
+        # Se inicializa el escritor CSV que escribirá en la respuesta
         writer = csv.writer(response)
+        # Se escribe la primera fila con los nombres de las columnas
+        writer.writerow(columnas) 
+        # Se recorren los resultados de la consulta y se escriben en el CSV
+        for fila in resultados:
+            # Para cada fila, se extraen los valores de las columnas y se escriben en el archivo
+            writer.writerow([fila.get(var, {}).get("value", "") for var in columnas])
+        return response
+    
+     # Exportar como TSV
+    elif formato == "tsv":
+        response = HttpResponse(content_type="text/tab-separated-values")
+        response["Content-Disposition"] = 'attachment; filename="consulta_sparql.tsv"'
+
+        writer = csv.writer(response, delimiter="\t")  # Se usa tabulación como separador
         writer.writerow(columnas)  # Escribir cabecera
-        # Recorre los resultados para crear el csv
+        # Se recorren los resultados de la consulta y se escriben en el TS
         for fila in resultados:
             writer.writerow([fila.get(var, {}).get("value", "") for var in columnas])
+            
+        return response
+    
+    # Exportar como JSON
+    elif formato == "json":
+        response = HttpResponse(content_type="application/json")
+        response["Content-Disposition"] = 'attachment; filename="consulta_sparql.json"'
+
+        # Se construye una lista de diccionarios con los datos de cada fila
+        json_data = [{var: fila.get(var, {}).get("value", "") for var in columnas} for fila in resultados]
+        # Se convierte la lista en un JSON formateado con indentación para mejor legibilidad
+        response.write(json.dumps(json_data, indent=4, ensure_ascii=False))  
+        
         return response
 
     return HttpResponse("Formato no soportado.", status=400)
 
-# Genera una consulta SPARQL a partir de los filtros proporcionados por el usuario
-# Se utiliza tanto para filtrar instancias en explorar_clase, como para busqueda en lenguaje natural
-def busqueda(request, filtro_clase, filtro_sujeto, filtro_propiedad, filtro_objeto, modo_filtro, clases_dict=None, uri_real_clase=None):
+# ---
+# Vista para realizar una búsqueda mediante formulario, sin utilizar SPARQL
+def busqueda_natural(request):
 
     selected_dataset = request.GET.get("dataset")
-    # Obtener datos del JSON
+    if not selected_dataset:
+        return render(request, "busqueda.html", {"instancias": []})
+
+    sparql = SPARQLQuery(selected_dataset)
+    
+    # Obtener clases y propiedades disponibles en el dataset
     dataset_data = utils.cargar_json_dataset(selected_dataset)
     clases_dict = dataset_data.get("clases", {}) if dataset_data else {}
     propiedades_dict = dataset_data.get("propiedades", {}) if dataset_data else {}
-    
-    # Construcción de la consulta
-    # Base de la consulta
-    condiciones = ["?s ?p ?o"]  
 
-    # Si estamos explorando una clase específica (explorar_clase), la añadimos 
-    if uri_real_clase:
-        condiciones.append(f"?s a <{uri_real_clase}>")
+    # Obtener filtros desde la URL
+    filtro_clase = request.GET.get("filtro_clase", "").strip()
+    filtro_sujeto = request.GET.get("filtro_sujeto", "").strip()
+    filtro_propiedad = request.GET.get("filtro_propiedad", "").strip()
+    filtro_objeto = request.GET.get("filtro_objeto", "").strip()
+    modo_filtro = request.GET.get("modo_filtro", "AND")  # Por defecto AND
 
-    # Aplicar filtros según los valores recibidos
-    if filtro_clase and clases_dict:
-        if filtro_clase in clases_dict.keys():
-            condiciones.append(f"?s a <{clases_dict[filtro_clase]}>")
-        if filtro_clase in clases_dict.values():
-            condiciones.append(f"?s a <{filtro_clase}>")
+    # Comprobar si el usuario ha realizado una búsqueda (al menos un filtro no está vacío)
+    busqueda_realizada = any([filtro_clase, filtro_sujeto, filtro_propiedad, filtro_objeto])
 
-    if filtro_sujeto:
-        condiciones.append(f'FILTER(CONTAINS(LCASE(STR(?s)), LCASE("{filtro_sujeto}")))')
+    # Si se ha realizado una búsqueda, se realiza la consulta y se procesan los resultados
+    instancias = []
+    if busqueda_realizada:
+        # Generar la consulta SPARQL a partir de los parámetros
+        query_instancias = utils.busqueda(filtro_clase, filtro_sujeto, filtro_propiedad, filtro_objeto, modo_filtro, clases_dict)
 
-    if filtro_propiedad:
-        condiciones.append(f'FILTER(CONTAINS(LCASE(STR(?p)), LCASE("{filtro_propiedad}")))')
+        # Ejecutar la consulta
+        resultado_instancias = sparql.ejecutar_consulta(query_instancias)
 
-    if filtro_objeto:
-        condiciones.append(f'FILTER(CONTAINS(LCASE(STR(?o)), LCASE("{filtro_objeto}")))')
+        # Procesar los resultados
+        for res in resultado_instancias["results"]["bindings"]:
+            label = res.get("label", {}).get("value", "").strip()
+            uri = res["s"]["value"]
+            nombre_mostrado = label if label else utils.obtener_nombre_uri(uri)
+            instancias.append({"uri": uri, "nombre": nombre_mostrado})
+            
+    # Paginación
+    paginator = Paginator(instancias, 20)  # Número de elementos por página
+    page_number = request.GET.get("page")
+    try:
+        page_obj = paginator.get_page(page_number)
+    except (PageNotAnInteger, EmptyPage):
+        page_obj = paginator.get_page(1)  # Si la página no es válida, redirigir a la primera
 
-    # Construcción de consulta según el modo de filtrado
-    if modo_filtro == "AND":
-        query = f"""
-            SELECT DISTINCT ?s ?label WHERE {{
-                {' . '.join(condiciones)}
-                OPTIONAL {{ ?s ?anyPredicate ?label . FILTER(REGEX(STR(?anyPredicate), "label", "i")) }}
-            }}
-        """
-    else:  # Modo OR con subconsultas combinadas por UNION
-        condiciones_union = []
-
-        if filtro_clase and clases_dict:
-            if filtro_clase in clases_dict.keys():
-                condiciones_union.append(f'{{ ?s a <{clases_dict[filtro_clase]}> }}')
-            if filtro_clase in clases_dict.values():
-                condiciones_union.append(f'{{ ?s a <{filtro_clase}> }}')
-
-        if filtro_sujeto:
-            condiciones_union.append(f'{{ ?s ?p ?o . FILTER(CONTAINS(LCASE(STR(?s)), LCASE("{filtro_sujeto}"))) }}')
-
-        if filtro_propiedad:
-            condiciones_union.append(f'{{ ?s ?p ?o . FILTER(CONTAINS(LCASE(STR(?p)), LCASE("{filtro_propiedad}"))) }}')
-
-        if filtro_objeto:
-            condiciones_union.append(f'{{ ?s ?p ?o . FILTER(CONTAINS(LCASE(STR(?o)), LCASE("{filtro_objeto}"))) }}')
-
-        if condiciones_union:
-            query = f"""
-                SELECT DISTINCT ?s ?label WHERE {{
-                    {f' UNION '.join(condiciones_union)}
-                    OPTIONAL {{ ?s ?anyPredicate ?label . FILTER(REGEX(STR(?anyPredicate), "label", "i")) }}
-                }}
-            """
-        else:
-            # Si no hay filtros, obtener todas las instancias disponibles
-            query = """
-                SELECT DISTINCT ?s ?label WHERE {
-                    ?s ?p ?o .
-                    OPTIONAL { ?s ?anyPredicate ?label . FILTER(REGEX(STR(?anyPredicate), "label", "i")) }
-                }
-            """
-
-    return query
+    return render(request, "busqueda.html", {
+        "instancias": page_obj if busqueda_realizada else None,
+        "dataset": selected_dataset,
+        "clases_disponibles": list(clases_dict.keys()),
+        "propiedades_disponibles": list(propiedades_dict.keys()),
+        "busqueda_realizada": busqueda_realizada,  # Para controlar si se muestran los resultados o no
+        # Pasamos los filtros actuales para mantenerlos en la plantilla
+        "filtro_clase": filtro_clase,
+        "filtro_sujeto": filtro_sujeto,
+        "filtro_propiedad": filtro_propiedad,
+        "filtro_objeto": filtro_objeto,
+        "modo_filtro": modo_filtro
+    })
 
 
-           

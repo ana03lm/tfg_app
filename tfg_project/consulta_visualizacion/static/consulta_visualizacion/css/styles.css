@@ -155,19 +155,19 @@ select {
 }
 
 /* Formulario de consulta */
-.consulta-form {
+#consulta-form {
   width: 90%;
   max-width: 1000px;
 }
 
-.consulta-form label {
+#consulta-form label {
   font-size: 16px;
   font-weight: bold;
-  display: block;
   margin-bottom: 5px;
+  display: block;
 }
 
-.consulta-form textarea {
+#consulta-form textarea {
   width: 97%;
   height: 200px;
   font-size: 14px;
@@ -176,6 +176,91 @@ select {
   border-radius: 5px;
   resize: vertical;
 }
+
+/* Formulario exportación de consulta */
+#exportForm {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 15px 30px;
+  max-width: 370px;
+  margin: auto;
+}
+
+#exportForm label {
+  font-size: 15px;
+  font-weight: bold;
+  white-space: nowrap; /* Evita que el texto se divida */
+}
+
+#exportForm select {
+  font-size: 14px;
+  padding: 3px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+#exportForm button {
+  margin-left: 35px;
+  padding: 6px 12px;
+  font-size: 14px;
+  max-width: 100px;
+}
+
+
+/* Formulario de búsqueda */
+/* Ajustes generales */
+#busqueda-form {
+  width: 90%;
+  max-width: 500px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Contenedor de cada uno de los campos */
+.busqueda-group {
+  margin-bottom: 15px;
+  margin-top: 5px;
+  margin-right: 20px;
+}
+
+.busqueda-group label {
+  font-size: 16px;
+  font-weight: bold;
+  text-align: left;
+  white-space: nowrap; /* Evita que el texto del label se divida */
+  display: block; /* Aparece el label como bloque, en una línea*/
+}
+
+.busqueda-group select,
+.busqueda-group input {
+  flex-grow: 1; /* Hace que ocupen el espacio restante sin exceder */
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+/* Botones búsqueda*/
+.busqueda-botones {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.busqueda-botones button {
+  width: 40%;
+  max-width: 200px;
+}
+
+#resultados-busqueda{
+  margin: 0 40px;
+}
+
 
 /* Mensajes de éxito y error */
 .correcto {
@@ -196,7 +281,7 @@ select {
   margin: 20px auto;
 }
 
-/* Estilos de las estadísticas */
+/* Estilos index */
 .stats{
   display:flex;
   flex-direction: row;
@@ -354,28 +439,6 @@ tr:nth-child(even) {
   background: #d5dbdb;
 }
 
-.back-button {
-  display: block;
-  width: fit-content;
-  margin: 30px auto;
-  padding: 12px 18px;
-  background: #3498db;
-  color: white;
-  text-align: center;
-  border-radius: 8px;
-  text-decoration: none;
-  font-weight: bold;
-  font-size: 16px;
-  transition: background 0.3s;
-}
-
-.back-button:hover {
-  background: #2980b9;
-}
-
-/* Filtros de la página de clase*/
-
-/* Contenedor para total e icono de filtrado */
 .items-instancias {
   display: flex;
   align-items: center;
@@ -390,7 +453,18 @@ tr:nth-child(even) {
   padding-right: 25px;
 }
 
-/* Icono de filtro */
+#uri_instancia {
+  display: block;
+  font-size: 14px;
+  color: #555;
+  text-align: center; 
+  margin-top: 5px; 
+  font-style: italic; 
+  margin-bottom: 25px;
+}
+
+/* Filtros de la página de clase*/
+/* Icono */
 .filtro-icono img {
   width: 30px;
   height: auto;
@@ -402,7 +476,7 @@ tr:nth-child(even) {
   transform: scale(1.2);
 }
 
-/* Panel lateral de filtros */
+/* Panel lateral*/
 .filtros-lateral {
   position: fixed;
   top: 0;
@@ -441,17 +515,36 @@ tr:nth-child(even) {
   border-radius: 5px;
 }
 
-.filtros-lateral button {
-  background: #007bff;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.3s ease;
+/* Pantalla de carga */
+.loading-container {
+  text-align: center; /* Centrar el contenido */
+  margin-top: 50px;
 }
 
-.filtros-lateral button:hover {
-  background: #0056b3;
+.loading-container h2 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #2c3e50; /* Azul oscuro */
 }
+
+.loading-container p {
+  font-size: 18px;
+  color: #555;
+}
+
+/* Mensaje de progreso */
+#loading-message {
+  font-size: 20px;
+  font-weight: bold;
+  color: #3498db; 
+  margin-top: 20px;
+  padding: 10px;
+  background: #dfeaf3; 
+  border-left: 5px solid #2980b9; 
+  display: inline-block;
+}
+
+
 
 /* Estilos para mejorar la apariencia en móviles */
 @media (max-width: 800px) {
@@ -487,6 +580,18 @@ tr:nth-child(even) {
 
 .filtro-icono {
   margin-top: 10px;
+}
+
+#busqueda-form {
+  width: 90%;
+}
+
+.busqueda-botones {
+  flex-direction: column;
+}
+
+.busqueda-botones button {
+  width: 100%;
 }
 
 }

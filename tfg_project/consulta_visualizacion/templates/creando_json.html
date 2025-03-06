@@ -4,31 +4,39 @@
 <title>Generando JSON | TFG</title>
 {% endblock %}
 
-{% block content %}
-    <h2>Generando visualización...</h2>
-    <p>Se están procesando los datos.</p>
-    <p> Esta operación podría tardar unos minutos. </p>
+{% block content %} 
 
-    <!--Comprobar cuando se ha generado el JSON para devolver al index-->
+    <div class="loading-container">
+        <h2>Generando visualización...</h2>
+        <p> Esta operación podría tardar unos minutos. </p>
+
+        <p id="loading-message">Preparando la generación...</p>
+    </div>
+
+    <!--Comprobar el estado de la generación del JSON cada 2 segundos y actualizar dinámicamente el mensaje de carga en la pantalla-->
     <script>
-        // Función para verificar si se está generando el JSON aún
-        function checkIfJsonReady() {
+        function checkStatus() {
+            // Petición a la vista verificar_json
             fetch("{% url 'verificar_json' %}?dataset={{ dataset }}")
+                // Convierte respuesta a JSON
                 .then(response => response.json())
+                //Verifica estado 
                 .then(data => {
-                    if (data.exists && !data.generating) {
-                        // Solo redirige cuando el JSON está listo y no en proceso
-                        window.location.href = "{% url 'index' %}?dataset={{ dataset }}";
-                    } else {
-                        // Si aún se está generando, vuelve a verificar después de 2 segundos
-                        setTimeout(checkIfJsonReady, 2000);
+                    // Si exists es TRUE, significa que se ha generado el JSON y redirige a index
+                    if (data.exists) {
+                        window.location.href = "{% url 'index' %}";
+                    } else if (data.generating) { // Si sigue en proceso, actualiza mensaje de carga y vuelve a llamar a la función en 2 segundos
+                        document.getElementById("loading-message").innerText = data.progress;
+                        setTimeout(checkStatus, 2000);
+                    } else { // SI hay error, se muestra mensaje
+                        document.getElementById("loading-message").innerText = "Error en la generación.";
                     }
                 })
-                .catch(error => console.error("Error al verificar JSON:", error));
+                .catch(error => console.error("Error verificando el estado:", error));
         }
-    
-        // Ejecutar la verificación
-        checkIfJsonReady();
+        
+        // Llamada a la función
+        checkStatus();
     </script>
     
 {% endblock %}

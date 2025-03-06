@@ -31,7 +31,7 @@ if not os.path.exists(JSON_DIR):
     os.makedirs(JSON_DIR)
 
 # Genera el JSON con los datos del dataset 
-def generar_json_dataset(selected_dataset):
+def generar_json_dataset(selected_dataset, actualizar_estado=lambda x: None):
     
     # Asegurar que el directorio JSON existe antes de generar el archivo
     if not os.path.exists(JSON_DIR):
@@ -43,6 +43,9 @@ def generar_json_dataset(selected_dataset):
     data = {}
     
     # MÉTRICAS GENERALES
+    # Función para imprimir mensajes de progreso en la pantalla de carga
+    actualizar_estado("Obteniendo métricas generales...")
+    # Construcción de la consulta
     consultas_metricas = {
         "num_tripletas": "SELECT (COUNT(*) AS ?numero) WHERE { ?s ?p ?o }",
         "num_clases": "SELECT (COUNT(DISTINCT ?class) AS ?numero) WHERE { ?s a ?class }",
@@ -60,6 +63,7 @@ def generar_json_dataset(selected_dataset):
             data[key] = 0
     
     # CLASES Y PROPIEDADES
+    actualizar_estado("Analizando clases y propiedades...")
     consultas_diccionarios = {
         "clases": """SELECT DISTINCT ?class (SAMPLE(REPLACE(STR(?class), "^.*[#/]", "")) AS ?label) WHERE { 
                         ?s a ?class .} 
@@ -86,6 +90,7 @@ def generar_json_dataset(selected_dataset):
         data["propiedades"] = {}
             
     ## DISTRIBUCIÓN DE CLASES Y PROPIEDADES
+    actualizar_estado("Generando distribuciones...")
     consultas_distribucion = {
         "distribucion_clases": """SELECT 
                         (SAMPLE(REPLACE(STR(?class), "^.*[#/]", "")) AS ?label)
@@ -115,6 +120,7 @@ def generar_json_dataset(selected_dataset):
             data[key] = []
             
     # RELACIONES ENTRE PROPIEDADES Y CLASES
+    actualizar_estado("Generando mapas de calor...")
     consultas_relaciones = {
         "relacion_propiedades_clases": """SELECT 
                                     (SAMPLE(REPLACE(STR(?s_class), "^.*[#/]", "")) AS ?s_class_label)
@@ -158,6 +164,7 @@ def generar_json_dataset(selected_dataset):
     
     # Guardar el JSON
     try:
+        actualizar_estado("Guardando el JSON...")
         # Nombre del JSON del dataset
         json_path = os.path.join(JSON_DIR, f"{selected_dataset}.json")
         # Se abre el archivo y se sobreescribe con los datos
@@ -175,3 +182,90 @@ def cargar_json_dataset(selected_dataset):
         with open(json_path, "r") as json_file:
             return json.load(json_file)
     return None
+
+
+# ---
+# Genera una consulta SPARQL a partir de los parámetros proporcionados por el usuario
+# Se utiliza tanto para filtrar instancias en explorar_clase, como para busqueda en lenguaje natural
+def busqueda(filtro_clase, filtro_sujeto, filtro_propiedad, filtro_objeto, modo_filtro, clases_dict=None, uri_real_clase=None):
+
+    # Si el modo de filtrado es AND, construimos una consulta donde todas las condiciones deben cumplirse
+    if modo_filtro == "AND":
+        condiciones = ["?s ?p ?o"]  # Base de la consulta. Se asegura que haya una estructura de tripleta
+        
+        # Si estamos explorando una clase específica, añadimos su filtro
+        if uri_real_clase:
+            condiciones.append(f"?s a <{uri_real_clase}>")
+
+        # Si hay valores en los filtros, se van añadiendo en las condiciones.
+        # Para ello se utilizan los filtros SPARQL, que filtrarán el parámetro por el valor insertado por el usuario con CONTAINS y LCASE 
+        # Esto permite un filtrado más intuitivo y más cercano al lenguaje natural
+        if filtro_clase and clases_dict:
+            if filtro_clase in clases_dict.keys():
+                condiciones.append(f"?s a <{clases_dict[filtro_clase]}>")
+            if filtro_clase in clases_dict.values():
+                condiciones.append(f"?s a <{filtro_clase}>")
+
+        if filtro_sujeto:
+            condiciones.append(f'FILTER(CONTAINS(LCASE(STR(?s)), LCASE("{filtro_sujeto}")))')
+
+        if filtro_propiedad:
+            condiciones.append(f'FILTER(CONTAINS(LCASE(STR(?p)), LCASE("{filtro_propiedad}")))')
+
+        if filtro_objeto:
+            condiciones.append(f'FILTER(CONTAINS(LCASE(STR(?o)), LCASE("{filtro_objeto}")))')
+
+        # Combina las condiciones
+        # Ordena alfabéticamente por label
+        query = f"""
+            SELECT DISTINCT ?s ?label WHERE {{
+                {' . '.join(condiciones)}
+                OPTIONAL {{ ?s ?anyPredicate ?label . FILTER(REGEX(STR(?anyPredicate), "label", "i")) }}
+            }}
+            ORDER BY LCASE(STR(?label))  
+        """
+
+    # Si el modo es OR, al menos una de las condiciones debe cumplirse
+    else:
+        condiciones_union = []
+        # Se construyen de nuevo las condiciones, pero esta vez se harán subconsultas
+        if filtro_clase and clases_dict:
+            if filtro_clase in clases_dict.keys():
+                condiciones_union.append(f'{{ ?s a <{clases_dict[filtro_clase]}> . ?s ?p ?o }}')
+            if filtro_clase in clases_dict.values():
+                condiciones_union.append(f'{{ ?s a <{filtro_clase}> . ?s ?p ?o }}')
+
+        if filtro_sujeto:
+            condiciones_union.append(f'{{ ?s ?p ?o . FILTER(CONTAINS(LCASE(STR(?s)), LCASE("{filtro_sujeto}"))) }}')
+
+        if filtro_propiedad:
+            condiciones_union.append(f'{{ ?s ?p ?o . FILTER(CONTAINS(LCASE(STR(?p)), LCASE("{filtro_propiedad}"))) }}')
+
+        if filtro_objeto:
+            condiciones_union.append(f'{{ ?s ?p ?o . FILTER(CONTAINS(LCASE(STR(?o)), LCASE("{filtro_objeto}"))) }}')
+
+        # Si estamos explorando una clase específica, aseguramos que todas las subconsultas mantengan la restricción
+        if uri_real_clase:
+            condiciones_union = [f'{{ ?s a <{uri_real_clase}> . {cond} }}' for cond in condiciones_union]
+
+        # Se construye la consulta combinando las subconsultas con UNION
+        # Asegurar que hay al menos una condición para evitar un UNION vacío
+        if condiciones_union:
+            query = f"""
+                SELECT DISTINCT ?s ?label WHERE {{
+                    {' UNION '.join(condiciones_union)}
+                    OPTIONAL {{ ?s ?anyPredicate ?label . FILTER(REGEX(STR(?anyPredicate), "label", "i")) }}
+                }}
+                ORDER BY LCASE(STR(?label))  # Ordena alfabéticamente por label
+            """
+        else:
+            # Si no hay filtros, obtener todas las instancias disponibles
+            query = """
+                SELECT DISTINCT ?s ?label WHERE {
+                    ?s ?p ?o .
+                    OPTIONAL { ?s ?anyPredicate ?label . FILTER(REGEX(STR(?anyPredicate), "label", "i")) }
+                }
+                ORDER BY LCASE(STR(?label))  # Ordena alfabéticamente por label
+            """
+
+    return query

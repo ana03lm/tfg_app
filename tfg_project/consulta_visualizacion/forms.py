@@ -18,11 +18,3 @@ class DatasetSelectionForm(forms.Form):
         datasets = kwargs.pop("datasets", [])
         super().__init__(*args, **kwargs)
         self.fields["dataset"].choices = [(ds, ds) for ds in datasets]  # Carga los datasets disponibles en el desplegable
-
-# Formulario de filtrado
-# class PropiedadFiltroForm(forms.Form):
-#     def __init__(self, propiedades_dict, *args, **kwargs):
-#         super(PropiedadFiltroForm, self).__init__(*args, **kwargs)
-#         for uri, label in propiedades_dict.items():
-#             # Agregamos un checkbox por cada propiedad
-#             self.fields[uri] = forms.BooleanField(label=label, required=False)
