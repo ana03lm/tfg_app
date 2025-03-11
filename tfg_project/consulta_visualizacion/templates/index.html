@@ -20,13 +20,26 @@
 
                 <button type="submit" class="btn btn-primary">Cargar Dataset</button>
             </form>
-    
+            
+            <hr>
+            <div id="acciones-dataset">
             <!-- Formulario para actualizar dataset (dentro del mismo bloque visual) -->
-            <form method="POST" action="{% url 'vista_generar_json' %}" class="update-form">
+            <form method="POST" action="{% url 'vista_generar_json' %}" class="botones-form-index">
                 {% csrf_token %}
                 <input type="hidden" name="dataset" value="{{ dataset }}">
                 <button type="submit" class="btn-update">Actualizar dataset</button>
             </form>
+
+            <form method="POST" action="{% url 'eliminar_dataset' %}" class="botones-form-index">
+                {% csrf_token %}
+                <input type="hidden" name="dataset" value="{{ dataset }}">
+                <!--Se incluye mensaje de confirmación-->
+                <button type="submit" class="btn-delete" onclick="return confirm('¿Seguro que deseas eliminar este dataset?')">
+                    Eliminar dataset
+                </button>
+            </form>
+            </div>
+            
         </div>
     </div>
     

@@ -4,6 +4,7 @@ from . import views
 urlpatterns = [
     path('', views.index, name='index'),
     path('subida', views.upload_rdf, name='subida'),
+    path("eliminar_dataset/", views.eliminar_dataset, name="eliminar_dataset"),
     path('estadisticas/', views.estadisticas, name='estadisticas'),
     path('instancia/', views.visualizar_instancia, name='visualizar_instancia'),
     path("consulta/", views.consulta_sparql, name="consulta_sparql"),

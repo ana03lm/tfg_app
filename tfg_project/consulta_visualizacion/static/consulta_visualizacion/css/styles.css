@@ -182,6 +182,19 @@ select {
   margin-top: 40px;
 }
 
+#acciones-dataset {
+  display: flex;
+  justify-content: center; 
+  gap: 20px;
+  margin-top: 20px;
+}
+
+#acciones-dataset button {
+  display: inline-block;
+  width: 160px;
+  margin: 0;
+}
+
 /* Formulario de consulta SPARQL */
 #consulta-form {
   width: 90%;

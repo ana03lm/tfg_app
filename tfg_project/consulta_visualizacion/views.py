@@ -85,6 +85,28 @@ def upload_rdf(request):
     return render(request, "upload.html", {"form": form})
 
 # ---
+# Vista para eliminar el dataset seleccionado de FUSEKI
+def eliminar_dataset(request):
+    if request.method == "POST":
+        dataset_seleccionado = request.POST.get("dataset")
+        if dataset_seleccionado:
+            url = f"{URL_FUSEKI}/$/datasets/{dataset_seleccionado}"
+            try:
+                # Se elimina
+                response = requests.delete(url)
+                # Si funciona, se redirige a index
+                if response.status_code in [200, 204]:
+                    return redirect("index") 
+                else:
+                    # Si hay error, se muestra un mensaje en la plantilla
+                    error_msg = f"Error al eliminar el dataset: {response.status_code} {response.text}"
+                    return render(request, "index.html", {"error": error_msg})
+            except Exception as e:
+                return render(request, "index.html", {"error": str(e)})
+
+    return redirect("index")
+
+# ---
 # Vista para cargar el dataset
 def index(request): 
     # Se obtienen los datasets. Si no hay, se redirige a la página de subida
