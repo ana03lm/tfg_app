@@ -85,7 +85,7 @@ def upload_rdf(request):
     return render(request, "upload.html", {"form": form})
 
 # ---
-# Vista para el Dashboard/Index
+# Vista para cargar el dataset
 def index(request): 
     # Se obtienen los datasets. Si no hay, se redirige a la página de subida
     datasets = utils.obtener_datasets()
@@ -102,25 +102,11 @@ def index(request):
     # Formulario con datasets disponibles para seleccionar el que se carga
     form = DatasetSelectionForm(request.GET, datasets=datasets)
     
-    # Cargar JSON si existe, si no, enviarlo a generarlo
-    dataset_data = utils.cargar_json_dataset(selected_dataset)
-    if not dataset_data:
-        return redirect(reverse("vista_generar_json") + f"?dataset={selected_dataset}")
-
     return render(request, "index.html", {
         "form": form,
         "datasets": datasets,
         "dataset": selected_dataset,
-        "num_tripletas": dataset_data.get("num_tripletas", 0),
-        "num_clases": dataset_data.get("num_clases", 0),
-        "num_instancias": dataset_data.get("num_instancias", 0),
-        "num_propiedades": dataset_data.get("num_propiedades", 0),
-        "distribucion_clases": json.dumps(dataset_data.get("distribucion_clases", [])),
-        "distribucion_propiedades": json.dumps(dataset_data.get("distribucion_propiedades", [])),
-        "relacion_propiedades_clases": json.dumps(dataset_data.get("relacion_propiedades_clases", [])),
-        "relacion_instancias_clases": json.dumps(dataset_data.get("relacion_instancias_clases", [])),
     })
-
 
 
 # ---
@@ -194,76 +180,126 @@ def verificar_json(request):
 
 
 # ---
-# Vista de la información de cada clase
-def explorar_clase(request, clase):
+# Vista para explorar el dataset con dashboard o mediante filtrado
+def estadisticas (request):
+    # Se obtienen los datasets. Si no hay, se redirige a la página de subida
+    datasets = utils.obtener_datasets()
+    if not datasets:
+        return redirect("subida")
+
+    # Se comprueba si hay un dataset seleccionado en la URL para cargarlo
     selected_dataset = request.GET.get("dataset")
+    # Si no lo hay, se redirige al primero en la lista
     if not selected_dataset:
-        return render(request, "explorar_clase.html", {"clase": clase, "propiedades": [], "instancias": []})
+        first_dataset = datasets[0]
+        return redirect(f"{request.path}?dataset={first_dataset}")
 
     sparql = SPARQLQuery(selected_dataset)
+    # Comprobar si el usuario ha realizado una búsqueda (al menos un filtro no está vacío)
+    busqueda_realizada = False
     
-    # Obtener datos del JSON
-    dataset_data = utils.cargar_json_dataset(selected_dataset)
-    clases_dict = dataset_data.get("clases", {}) if dataset_data else {}
-     
-    # La uri de la clase que se solicita en la página para generarla correctamente
-    uri_real_clase = clases_dict.get(clase, None)
-    # Si la clase no está en el dataset, se devuelve la vista sin datos
-    if not uri_real_clase:
-        return render(request, "explorar_clase.html", {"clase": clase, "propiedades": [], "instancias": [], "dataset": selected_dataset})
-
-    # Consulta SPARQL para obtener las propiedades utilizadas por la clase y su frecuencia de uso
-    query_propiedades = f"""
-        SELECT DISTINCT ?propiedad (COUNT(?propiedad) AS ?num_propiedad) WHERE {{
-            ?s a <{uri_real_clase}> ;
-               ?propiedad ?o .
-        }} GROUP BY ?propiedad ORDER BY DESC (?num_propiedad)
-    """
-
     # Obtener filtros desde la URL
+    clase_base = request.GET.get('clase_base', 'todas').strip()
     filtro_clase = request.GET.get("filtro_clase", "").strip()
     filtro_sujeto = request.GET.get("filtro_sujeto", "").strip()
     filtro_propiedad = request.GET.get("filtro_propiedad", "").strip()
     filtro_objeto = request.GET.get("filtro_objeto", "").strip()
     modo_filtro = request.GET.get("modo_filtro", "AND")  # Por defecto AND
     
-    # Generar la consulta SPARQL para mostrar las instancias
-    query_instancias = utils.busqueda( filtro_clase, filtro_sujeto, filtro_propiedad, filtro_objeto, modo_filtro, clases_dict, uri_real_clase )
-
-    # Ejecutamos las consultas
-    resultado_propiedades = sparql.ejecutar_consulta(query_propiedades)
-    resultado_instancias = sparql.ejecutar_consulta(query_instancias)
-
-    # Procesamos las propiedades
-    propiedades = {utils.obtener_nombre_uri(res["propiedad"]["value"]): res["num_propiedad"]["value"]
-                   for res in resultado_propiedades["results"]["bindings"]}
-
-    # Procesamos las instancias
-    instancias = []
-    for res in resultado_instancias["results"]["bindings"]:
-        label = res.get("label", {}).get("value", "").strip()  # Obtener label si existe
-        uri = res["s"]["value"]  # URI de la instancia
-        nombre_mostrado = label if label else utils.obtener_nombre_uri(uri)  # Si hay label, se usa; si no, se extrae el nombre de la URI
-        instancias.append({"uri": uri, "nombre": nombre_mostrado})
-
-    # Contar el total de instancias obtenidas
-    num_instancias = len(instancias) 
+    # Obtener datos del JSON
+    dataset_data = utils.cargar_json_dataset(selected_dataset)
+    clases_dict = dataset_data.get("clases", {}) if dataset_data else {}
+    propiedades_dict = dataset_data.get("propiedades", {}) if dataset_data else {}
+     
+    #  Si hay algún filtro, entonces busqueda_realizada es True
+    if clase_base != "todas" or any([filtro_clase, filtro_sujeto, filtro_propiedad, filtro_objeto]):
+        busqueda_realizada = True
     
-    # Paginación de instancias (20 por página)
-    paginator = Paginator(instancias, 20)  # Número de elementos por página
-    page_number = request.GET.get("page")
-    try:
-        page_obj = paginator.get_page(page_number)
-    except (PageNotAnInteger, EmptyPage):
-        page_obj = paginator.get_page(1)  # Si la página no es válida, redirigir a la primera
+    # Si se ha realizado una búsqueda, se realiza la consulta y se procesan los resultados
+    if busqueda_realizada:
+        instancias = []
         
-    return render(request, "explorar_clase.html", {
+        # Si se ha seleccionado clase base, se obtienen los resultados de esta
+        # También se obtienen las propiedades para que en el select solo figuren las que son utilizadas por la clase base
+        if clase_base != "todas":
+            
+            # Se obtiene la uri de la clase  base
+            uri_real_clase = clases_dict.get(clase_base, None)
+                        
+            # Generar la consulta SPARQL a partir de los parámetros 
+            query_instancias = utils.busqueda( filtro_clase, filtro_sujeto, filtro_propiedad, filtro_objeto, modo_filtro, clases_dict, uri_real_clase )
+
+            # Consulta SPARQL para obtener las propiedades utilizadas por la clase y su frecuencia de uso
+            query_propiedades = f"""
+                SELECT DISTINCT ?propiedad (COUNT(?propiedad) AS ?num_propiedad) WHERE {{
+                    ?s a <{uri_real_clase}> ;
+                    ?propiedad ?o .
+                }} GROUP BY ?propiedad ORDER BY DESC (?num_propiedad)
+            """
+            
+           # Ejecutamos las consultas
+            resultado_propiedades = sparql.ejecutar_consulta(query_propiedades)
+            # Procesamos las propiedades para el select
+            propiedades_dict = {utils.obtener_nombre_uri(res["propiedad"]["value"]): res["num_propiedad"]["value"]
+                        for res in resultado_propiedades["results"]["bindings"]}
+        else:
+            # Si no se ha elegido clase base, entonces se utilizan el resto de filtros para formar la consulta
+            query_instancias = utils.busqueda(filtro_clase, filtro_sujeto, filtro_propiedad, filtro_objeto, modo_filtro, clases_dict)
+           
+        # Ejecutar la consulta
+        resultado_instancias = sparql.ejecutar_consulta(query_instancias)
+        # Procesamos las instancias y generamos un diccionario con uri y label para cada una
+        for res in resultado_instancias["results"]["bindings"]:
+            label = res.get("label", {}).get("value", "").strip()  # Obtener label si existe
+            uri = res["s"]["value"]  # URI de la instancia
+            nombre_mostrado = label if label else utils.obtener_nombre_uri(uri)  # Si hay label, se usa; si no, se extrae el nombre de la URI
+            instancias.append({"uri": uri, "nombre": nombre_mostrado})
+
+        # Contar el total de instancias obtenidas
+        num_instancias = len(instancias) 
+    
+        # Paginación (20 por página)
+        paginator = Paginator(instancias, 20)  # Número de elementos por página
+        page_number = request.GET.get("page", 1)
+        try:
+            page_obj = paginator.get_page(page_number)
+        except (PageNotAnInteger, EmptyPage):
+            page_obj = paginator.get_page(1)  # Si la página no es válida, redirigir a la primera
+        
+        # Se devuelven los datos necesarios para generar la vista filtrado_instancias
+        return render(request, "filtrado_instancias.html", {
+            "dataset": selected_dataset,
+            "busqueda_realizada": busqueda_realizada,  # Para controlar si se muestran instancias o no
+            # Mostrar instancias
+            "instancias": page_obj,
+            "num_instancias": num_instancias,
+            # Se pasan los filtros para mantenerlos en la plantilla
+            "clase_base": clase_base,
+            "filtro_clase": filtro_clase,
+            "filtro_sujeto": filtro_sujeto,
+            "filtro_propiedad": filtro_propiedad,
+            "filtro_objeto": filtro_objeto,
+            "modo_filtro": modo_filtro,
+            # Se pasan las clases y propiedades del dataset para los select
+            "clases_disponibles": list(clases_dict.keys()),
+            "propiedades_disponibles": propiedades_dict,
+        })
+    else:
+        # Si no hay una busqueda, entonces se muestra el dashboard con las visualizaciones
+        return render(request, "dashboard.html", {
         "dataset": selected_dataset,
-        "clase": clase,
-        "propiedades": propiedades,
-        "instancias": page_obj,
-        "num_instancias": num_instancias,
+        "busqueda_realizada": busqueda_realizada,  # Para controlar si se muestran instancias o no
+        # Datos para enerar visualizaciones
+        "num_tripletas": dataset_data.get("num_tripletas", 0),
+        "num_clases": dataset_data.get("num_clases", 0),
+        "num_instancias": dataset_data.get("num_instancias", 0),
+        "num_propiedades": dataset_data.get("num_propiedades", 0),
+        "distribucion_clases": json.dumps(dataset_data.get("distribucion_clases", [])),
+        "distribucion_propiedades": json.dumps(dataset_data.get("distribucion_propiedades", [])),
+        "relacion_propiedades_clases": json.dumps(dataset_data.get("relacion_propiedades_clases", [])),
+        "relacion_instancias_clases": json.dumps(dataset_data.get("relacion_instancias_clases", [])),
         # Se pasan los filtros para mantenerlos en la plantilla
+        "clase_base": clase_base,
         "filtro_clase": filtro_clase,
         "filtro_sujeto": filtro_sujeto,
         "filtro_propiedad": filtro_propiedad,
@@ -271,9 +307,8 @@ def explorar_clase(request, clase):
         "modo_filtro": modo_filtro,
         # Se pasan las clases y propiedades del dataset para el filtrado
         "clases_disponibles": list(clases_dict.keys()),
-        "propiedades_disponibles": sorted(list(propiedades.keys())),
+        "propiedades_disponibles": sorted(list(propiedades_dict.keys())),
     })
-
 
 # ---
 # Visualización de propiedades y valores de cada instancia
@@ -344,7 +379,10 @@ def visualizar_instancia(request):
 
             # Si el valor es una clase, enlazar a la exploración de clase
             if valor_nombre in clases_dict:
-                valor_enlace = f"/consulta_visualizacion/explorar/{urllib.parse.quote(valor_nombre)}?dataset={selected_dataset}"
+                valor_enlace = (f"/consulta_visualizacion/estadisticas/?dataset={selected_dataset}"
+                f"&clase_base={urllib.parse.quote(valor_nombre)}"
+                f"&filtro_clase=&filtro_sujeto=&filtro_propiedad=&filtro_objeto=&modo_filtro=AND")
+                
                 detalles.append((propiedad_nombre, valor_nombre, valor_enlace, "clase"))
             else:  
                 # Verificar si el valor es una instancia del dataset
@@ -433,6 +471,7 @@ def consulta_sparql(request):
         "num_resultados": num_resultados
     })
 
+
 #  Vista para exportar resultados almacenados en la sesión en el formato seleccionado (CSV, JSON o TSV )
 def exportar_resultados_sparql(request):
     
@@ -489,68 +528,3 @@ def exportar_resultados_sparql(request):
         return response
 
     return HttpResponse("Formato no soportado.", status=400)
-
-# ---
-# Vista para realizar una búsqueda mediante formulario, sin utilizar SPARQL
-def busqueda_natural(request):
-
-    selected_dataset = request.GET.get("dataset")
-    if not selected_dataset:
-        return render(request, "busqueda.html", {"instancias": []})
-
-    sparql = SPARQLQuery(selected_dataset)
-    
-    # Obtener clases y propiedades disponibles en el dataset
-    dataset_data = utils.cargar_json_dataset(selected_dataset)
-    clases_dict = dataset_data.get("clases", {}) if dataset_data else {}
-    propiedades_dict = dataset_data.get("propiedades", {}) if dataset_data else {}
-
-    # Obtener filtros desde la URL
-    filtro_clase = request.GET.get("filtro_clase", "").strip()
-    filtro_sujeto = request.GET.get("filtro_sujeto", "").strip()
-    filtro_propiedad = request.GET.get("filtro_propiedad", "").strip()
-    filtro_objeto = request.GET.get("filtro_objeto", "").strip()
-    modo_filtro = request.GET.get("modo_filtro", "AND")  # Por defecto AND
-
-    # Comprobar si el usuario ha realizado una búsqueda (al menos un filtro no está vacío)
-    busqueda_realizada = any([filtro_clase, filtro_sujeto, filtro_propiedad, filtro_objeto])
-
-    # Si se ha realizado una búsqueda, se realiza la consulta y se procesan los resultados
-    instancias = []
-    if busqueda_realizada:
-        # Generar la consulta SPARQL a partir de los parámetros
-        query_instancias = utils.busqueda(filtro_clase, filtro_sujeto, filtro_propiedad, filtro_objeto, modo_filtro, clases_dict)
-
-        # Ejecutar la consulta
-        resultado_instancias = sparql.ejecutar_consulta(query_instancias)
-
-        # Procesar los resultados
-        for res in resultado_instancias["results"]["bindings"]:
-            label = res.get("label", {}).get("value", "").strip()
-            uri = res["s"]["value"]
-            nombre_mostrado = label if label else utils.obtener_nombre_uri(uri)
-            instancias.append({"uri": uri, "nombre": nombre_mostrado})
-            
-    # Paginación
-    paginator = Paginator(instancias, 20)  # Número de elementos por página
-    page_number = request.GET.get("page")
-    try:
-        page_obj = paginator.get_page(page_number)
-    except (PageNotAnInteger, EmptyPage):
-        page_obj = paginator.get_page(1)  # Si la página no es válida, redirigir a la primera
-
-    return render(request, "busqueda.html", {
-        "instancias": page_obj if busqueda_realizada else None,
-        "dataset": selected_dataset,
-        "clases_disponibles": list(clases_dict.keys()),
-        "propiedades_disponibles": list(propiedades_dict.keys()),
-        "busqueda_realizada": busqueda_realizada,  # Para controlar si se muestran los resultados o no
-        # Pasamos los filtros actuales para mantenerlos en la plantilla
-        "filtro_clase": filtro_clase,
-        "filtro_sujeto": filtro_sujeto,
-        "filtro_propiedad": filtro_propiedad,
-        "filtro_objeto": filtro_objeto,
-        "modo_filtro": modo_filtro
-    })
-
-

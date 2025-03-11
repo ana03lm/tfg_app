@@ -3,7 +3,6 @@
   margin: 0;
 }
 
-/* Estilos generales */
 body {
   font-family: Arial, sans-serif;
   background-color: #f4f4f4;
@@ -36,18 +35,33 @@ p {
   font-size: 18px;
 }
 
+hr{
+  margin:25px 0;
+}
+
 /* Navegación */
+nav {
+  position: fixed; /* Para que esté fija en la parte superior de la pantalla */
+  top: 0;
+  left: 20px;
+  width: 100%;
+  height: 40px; 
+  background-color: #f4f4f4; 
+  z-index: 1000; /* Para que siempre esté por encima del contenido */
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+}
+
 nav ul {
   list-style-type: none;
   padding: 0;
-  position: relative; /* Asegura que los submenús se posicionen correctamente */
   font-weight: bold;
 }
 
 nav ul li {
   display: inline-block;
   margin-right: 15px;
-  position: relative; /* Para que los submenús se posicionen dentro del elemento padre */
 }
 
 nav a {
@@ -57,285 +71,6 @@ nav a {
 
 nav a:hover{
   color: blue;
-}
-
-details {
-  cursor: pointer;
-  position: relative;
-}
-
-details summary {
-  padding: 10px;
-  border-radius: 5px;
-  display: inline-block;
-  cursor: pointer;
-  position: relative;
-  list-style: none;
-}
-
-details summary:hover{
-  color: blue;
-}
-
-details summary::after {
-  content: " ▼"; /* Flecha hacia abajo */
-  font-size: 12px;
-  margin-left: 5px;
-}
-
-details[open] summary::after {
-  content: " ▲"; /* Flecha hacia arriba cuando está abierto */
-}
-
-details[open] ul {
-  position: absolute;
-  top: 100%; /* Hace que el submenú aparezca debajo del summary */
-  left: 0;
-  background-color: white;
-  border: 1px solid #ccc;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  padding: 10px;
-  list-style-type: none;
-  min-width: 150px;
-  z-index: 1000; /* Asegura que esté por encima de otros elementos */
-}
-
-details ul li {
-  display: block;
-  padding: 5px 10px;
-  white-space: nowrap; /* Evita que los textos largos se corten */
-}
-
-details ul li:hover {
-  background-color: #f0f0f0;
-}
-
-
-/* Estilos para formularios */
-form {
-  background: #fff;
-  padding: 20px;
-  margin: 20px auto;
-  max-width: 400px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-input, button {
-  display: block;
-  width: 100%;
-  margin: 10px 0;
-  padding: 10px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-input:focus {
-  border-color: #007BFF;
-  outline: none;
-}
-
-button {
-  background: #007BFF;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.3s ease;
-  border: none;
-}
-
-button:hover {
-  background: #0056b3;
-}
-
-select {
-  padding: 5px;
-  margin: 5px;
-}
-
-/* Formulario de consulta */
-#consulta-form {
-  width: 90%;
-  max-width: 1000px;
-}
-
-#consulta-form label {
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 5px;
-  display: block;
-}
-
-#consulta-form textarea {
-  width: 97%;
-  height: 200px;
-  font-size: 14px;
-  padding: 10px;
-  border: 1px solid #ced4da;
-  border-radius: 5px;
-  resize: vertical;
-}
-
-/* Formulario exportación de consulta */
-#exportForm {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  padding: 15px 30px;
-  max-width: 370px;
-  margin: auto;
-}
-
-#exportForm label {
-  font-size: 15px;
-  font-weight: bold;
-  white-space: nowrap; /* Evita que el texto se divida */
-}
-
-#exportForm select {
-  font-size: 14px;
-  padding: 3px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-#exportForm button {
-  margin-left: 35px;
-  padding: 6px 12px;
-  font-size: 14px;
-  max-width: 100px;
-}
-
-
-/* Formulario de búsqueda */
-/* Ajustes generales */
-#busqueda-form {
-  width: 90%;
-  max-width: 500px;
-  margin: 20px auto;
-  padding: 20px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Contenedor de cada uno de los campos */
-.busqueda-group {
-  margin-bottom: 15px;
-  margin-top: 5px;
-  margin-right: 20px;
-}
-
-.busqueda-group label {
-  font-size: 16px;
-  font-weight: bold;
-  text-align: left;
-  white-space: nowrap; /* Evita que el texto del label se divida */
-  display: block; /* Aparece el label como bloque, en una línea*/
-}
-
-.busqueda-group select,
-.busqueda-group input {
-  flex-grow: 1; /* Hace que ocupen el espacio restante sin exceder */
-  padding: 8px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-/* Botones búsqueda*/
-.busqueda-botones {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 15px;
-}
-
-.busqueda-botones button {
-  width: 40%;
-  max-width: 200px;
-}
-
-#resultados-busqueda{
-  margin: 0 40px;
-}
-
-
-/* Mensajes de éxito y error */
-.correcto {
-  background-color: #d4edda;
-  color: #155724;
-  padding: 10px;
-  border-radius: 5px;
-  max-width: 400px;
-  margin: 20px auto;
-}
-
-.error {
-  background-color: #f8d7da;
-  color: #721c24;
-  padding: 10px;
-  border-radius: 5px;
-  max-width: 400px;
-  margin: 20px auto;
-}
-
-/* Estilos index */
-.stats{
-  display:flex;
-  flex-direction: row;
-  padding:30px 0;
-}
-
-.stats > *{
-  background-color: white;
-  border-radius: 5px;
-  flex: 1 0 auto;
-  text-align: center;
-  padding: 20px;
-}
-
-.indicador{
-  font-size: 2rem;
-  font-weight: bold;
-}
-
-.grafico {
-  width: 100%;
-  overflow-x: auto; /* Si es más grande, permite scroll */
-  overflow-y: scroll;
-  padding-bottom: 20px;
-} 
-
-/* Botón de actualización */
-.update-form {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  margin: 0;
-  padding: 0;
-  background: None;
-  box-shadow: None;
-}
-
-.update-btn {
-  background-color: #007bff; 
-  color: white;
-  padding: 12px 20px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.update-btn:hover {
-  background-color: #0056b3; /* Azul más oscuro */
-  transform: scale(1.05);
-}
-
-.update-btn:active {
-  background-color: #004085;
-  transform: scale(0.95);
 }
 
 /* Paginación */
@@ -366,7 +101,168 @@ select {
   font-size: 14px;
 }
 
-/* Tablas */
+/* Mensajes de éxito y error */
+.correcto {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 10px;
+  border-radius: 5px;
+  max-width: 400px;
+  margin: 20px auto;
+}
+
+.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 10px;
+  border-radius: 5px;
+  max-width: 400px;
+  margin: 20px auto;
+}
+
+/* Estilos para formularios */
+input, button {
+  display: block;
+  width: 40%;
+  max-width: 200px;
+  margin: 5px 0;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+input:focus {
+  border-color: #007BFF;
+  outline: none;
+}
+
+button {
+  background: #007BFF;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  border: none;
+  margin:20px auto;
+}
+
+button:hover {
+  background: #0056b3;
+}
+
+select {
+  padding: 5px;
+  margin: 5px;
+}
+
+.helptext{
+  font-size: 15px;
+  margin: 10px 0;
+}
+
+/* Formulario index*/
+.contenedor-formularios {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.formularios_index {
+  background: white;
+  padding: 35px 25px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 100%;
+  max-width: 500px;
+}
+
+.formulario_dataset button{
+  margin-top: 40px;
+}
+
+/* Formulario de consulta SPARQL */
+#consulta-form {
+  width: 90%;
+  max-width: 1000px;
+  background: #fff;
+  padding: 20px;
+  margin: 20px auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#consulta-form label {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  display: block;
+}
+
+#consulta-form textarea {
+  width: 97%;
+  height: 200px;
+  font-size: 14px;
+  padding: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 5px;
+  resize: vertical;
+}
+
+/* Formulario exportación de consulta */
+#exportForm {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 30px;
+  max-width: 370px;
+  background: #fff;
+  margin: 30px auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#exportForm label {
+  font-size: 15px;
+  font-weight: bold;
+  white-space: nowrap; /* Evita que el texto se divida */
+}
+
+#exportForm select {
+  font-size: 14px;
+  padding: 3px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+#exportForm button {
+  margin-left: 35px;
+  padding: 6px 12px;
+  font-size: 14px;
+  max-width: 100px;
+}
+
+/* Formulario subida datasets */
+#form-subida{
+  width: 90%;
+  max-width: 500px;
+  background: #fff;
+  padding: 35px 10px;
+  margin: 20px auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+  text-align: center;
+}
+
+#form-subida input{
+  margin: auto;
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+
+
+/* Tablas resultados SPARQL */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -393,27 +289,108 @@ tr:nth-child(even) {
   background: #f2f2f2;
 }
 
-/* Página de las clases e instancias */
-.explorar-container {
-  max-width: 1100px;
-  margin: 40px auto;
-  padding: 20px;
-  background: white;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  overflow-x: auto;
+/* Página estadisticas (dashboard+filtrado)*/
+.estadisticas {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
 }
 
-.info-card {
-  background: #f9f9f9;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  margin-bottom: 25px;
+/* Barra lateral de filtrado */
+.barra-filtros {
+  width: 280px; 
+  padding: 20px 20px 20px 0;
+  border-right: 2px solid #ddd; 
+  overflow-y: auto; /* Permite scroll interno si hay muchos filtros */
+  flex-shrink: 0; /* Evita que la barra se reduzca en pantallas pequeñas */
+  position: sticky; /* Hace que la barra lateral permanezca visible */
+  top: 40px; /* La mantiene debajo del menú de navegación */
+  height: calc(100vh - 80px); /* Ajusta la altura para que encaje con la pantalla */
 }
 
-.info-card ul {
+.barra-filtros h2 {
+  font-size: 20px;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+/* Contenedor de cada uno de los campos de la barra lateral */
+.busqueda-group {
+  margin-bottom: 15px;
+  margin-top: 5px;
+  margin-right: 20px;
+}
+
+.busqueda-group label {
+  font-weight: bold;
+  text-align: left;
+  white-space: nowrap; /* Evita que el texto del label se divida */
+  display: block; /* Aparece el label como bloque, en una línea*/
+}
+
+.busqueda-group select,
+.busqueda-group input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+/* Botones de búsqueda y limpiar */
+.busqueda-botones {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 35px;
+}
+
+.busqueda-botones button {
+  width: 40%;
+  max-width: 200px;
+  padding: 10px;
+  margin: 5px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* Contenido de la página de estadísticas (dashboard+filtrado) */
+.info {
+  flex-grow: 1; /* Se expande para ocupar el espacio restante */
+  padding: 0 30px;
+}
+
+/* Estilos dashboard */
+.metricas{
+  display:flex;
+  flex-direction: row;
+  padding:30px 0;
+}
+
+.metricas > *{
+  background-color: white;
+  border-radius: 5px;
+  flex: 1 0 auto;
+  text-align: center;
+  padding: 20px;
+}
+
+.indicador{
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.grafico {
+  width: 100%;
+  overflow-x: auto; /* Si es más grande, permite scroll */
+  overflow-y: scroll;
+  padding-bottom: 20px;
+} 
+
+/* Página instancias filtradas */
+.info ul {
   list-style: none;
+  margin-top: 20px;
   padding: 0;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -421,8 +398,8 @@ tr:nth-child(even) {
   justify-content: center;
 }
 
-.info-card li {
-  background: #ecf0f1;
+.info li {
+  background: #ffffff;
   padding: 12px;
   border-radius: 8px;
   transition: background 0.3s ease;
@@ -435,15 +412,64 @@ tr:nth-child(even) {
   white-space: normal; /* Permite que el texto pase a la siguiente línea */
 }
 
-.info-card li:hover {
-  background: #d5dbdb;
+.info li:hover {
+  background: #ecf0f1;
 }
 
-.items-instancias {
+/* Mostrar los filtros activos */
+.filtros-lista {
   display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin:25px 0;
+}
+
+.filtro-item {
+  display: inline-flex;
   align-items: center;
-  justify-content: right;
-  padding-bottom: 10px;
+  background: #fff;
+  padding: 5px 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.filtro-item a {
+  margin-left: 8px;
+  color: #a00;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.borrar-todo {
+  align-items: center;
+  padding: 5px 10px;
+  color: #a00;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.tit-filtros{
+  font-weight: bold;
+  margin-right: 5px;
+  align-items: center;
+  padding: 5px 0;
+}
+
+.tit-filtro{
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+/* Página de una instancia */
+.explorar-container {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 20px;
+  background: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow-x: auto;
 }
 
 .total-instancias {
@@ -461,58 +487,6 @@ tr:nth-child(even) {
   margin-top: 5px; 
   font-style: italic; 
   margin-bottom: 25px;
-}
-
-/* Filtros de la página de clase*/
-/* Icono */
-.filtro-icono img {
-  width: 30px;
-  height: auto;
-  cursor: pointer;
-  transition: transform 0.3s ease;
-}
-
-.filtro-icono img:hover {
-  transform: scale(1.2);
-}
-
-/* Panel lateral*/
-.filtros-lateral {
-  position: fixed;
-  top: 0;
-  right: -300px;
-  width: 270px;
-  height: 100%;
-  background: #f9f9f9;
-  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
-  padding: 20px;
-  transition: right 0.3s ease-in-out;
-  overflow-y: auto;
-  z-index: 1000;
-}
-
-.filtros-lateral:not(.oculto) {
-  right: 0;
-}
-
-/* Botón para cerrar el panel */
-.cerrar-filtros img {
-  width: 30px;
-  cursor: pointer;
-  float: right;
-  margin-bottom: 10px;
-}
-
-/* Botones y campos dentro del panel */
-.filtros-lateral input,
-.filtros-lateral select,
-.filtros-lateral button {
-  width: 100%;
-  margin-bottom: 10px;
-  padding: 8px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
 }
 
 /* Pantalla de carga */
@@ -545,7 +519,6 @@ tr:nth-child(even) {
 }
 
 
-
 /* Estilos para mejorar la apariencia en móviles */
 @media (max-width: 800px) {
   body {
@@ -556,42 +529,28 @@ tr:nth-child(even) {
       width: 90%;
   }
 
-  .stats{
+  .metricas{
     display:block;
     flex-direction: row;
     padding:30px 0;
   }
 
-  .update-form {
-    position: static; /* Elimina la posición absoluta */
-    display: flex;
-    justify-content: center;  /* Centra el botón */
-    margin: auto;
+  .estadisticas {
+    flex-direction: column; /* Cambia a diseño en columna */
   }
 
-  .update-btn {
-    width: 50%;  /* Hace que el botón sea más ancho */
-    max-width: 300px; /* Limita el ancho del botón */
-}
+  .barra-filtros {
+    width: 100%; /* Ocupa todo el ancho */
+    border-right: none;
+    border-bottom: 2px solid #ddd; /* Línea separadora abajo */
+  }
 
-.filtros-lateral {
-  width: 200px;
-}
+  .busqueda-botones {
+    flex-direction: column;
+  }
 
-.filtro-icono {
-  margin-top: 10px;
-}
-
-#busqueda-form {
-  width: 90%;
-}
-
-.busqueda-botones {
-  flex-direction: column;
-}
-
-.busqueda-botones button {
-  width: 100%;
+  .busqueda-botones button {
+    width: 100%;
 }
 
 }

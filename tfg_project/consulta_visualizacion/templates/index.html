@@ -5,18 +5,31 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Dashboard del dataset: {{dataset}}</h1>
+    <h1>Dataset: {{dataset}}</h1>
 
-    <!--Formulario para seleccionar dataset-->
-    <form method="GET">
-        {{ form.as_p }}
-        <button type="submit">Cargar Dataset</button>
-        <!-- Enlace para subir uno nuevo-->
-        <p>
-            ¿No encuentras el dataset que buscas? 
-            <a href="{% url 'subida' %}">Sube uno nuevo aquí</a>.
-        </p>
-    </form>
+    <div class="contenedor-formularios">
+        <!-- Formulario para seleccionar dataset -->
+        <div class="formularios_index">
+            <form method="GET" class="formulario_dataset">
+                {{ form.as_p }}
+
+                <p class="helptext">
+                    ¿No encuentras el dataset que buscas? 
+                    <a href="{% url 'subida' %}">Sube uno nuevo aquí</a>
+                </p>
+
+                <button type="submit" class="btn btn-primary">Cargar Dataset</button>
+            </form>
+    
+            <!-- Formulario para actualizar dataset (dentro del mismo bloque visual) -->
+            <form method="POST" action="{% url 'vista_generar_json' %}" class="update-form">
+                {% csrf_token %}
+                <input type="hidden" name="dataset" value="{{ dataset }}">
+                <button type="submit" class="btn-update">Actualizar dataset</button>
+            </form>
+        </div>
+    </div>
+    
   
     <!--Al cargar el dataset se controla si tiene JSON o no para crearlo-->
     <script>
@@ -40,154 +53,6 @@
                 })
                 .catch(error => console.error("Error al verificar JSON:", error));
         });
-    </script>
-
-      <!--Botón para actualizar JSON-->
-      <form method="POST" action="{% url 'vista_generar_json' %}" class="update-form">
-        {% csrf_token %}
-        <input type="hidden" name="dataset" value="{{ dataset }}">
-        <button type="submit">Actualizar dataset</button>
-    </form>
-
-    <!-- Tarjetas de métricas generales -->
-    <div class="stats">
-        <div>
-            <p class="indicador">{{ num_tripletas }}</p>
-            <p>Total de Tripletas</p>
-        </div>
-        <div>
-            <p class="indicador">{{ num_clases }}</p>
-            <p>Número de Clases</p>
-        </div>
-        <div>
-            <p class="indicador">{{ num_instancias }}</p>
-            <p>Número de Instancias</p>
-        </div>
-        <div>
-            <p class="indicador">{{ num_propiedades }}</p>
-            <p>Número de Propiedades</p>
-        </div>
-    </div>
-
-    <!-- Gráficos -->
-    <div class="grafico-contenedor">
-        <h2>Distribución de Clases</h2>
-        <div class="grafico" id="grafico-clases"></div>
-    </div>
-
-    <div class="grafico-contenedor">        
-        <h2>Distribución de Propiedades</h2>
-        <div class="grafico" id="grafico-propiedades"></div>
-    </div>
-
-    <div class="grafico-contenedor">
-        <h2>Relaciones entre instancias de las clases</h2>
-        <div class="grafico" id="heatmap_instancias_clases"></div>
-    </div>
-
-    <div class="grafico-contenedor">
-        <h2>Aparición de las propiedades en cada clase</h2>
-        <div class="grafico" id="heatmap_propiedades_clases"></div>
-    </div>
-
-    <!--Referencia a Plotly.js-->
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <script>
-        // Configuración de Plotly
-        var config = {
-            displayModeBar: true,
-            displaylogo: false,
-            responsive: false,
-        }
-        
-        // Disposición gráficos barra
-        var layoutBar = {
-            height: 500,
-            margin: {"t": 50, "b": 50, "l": 20, "r": 20},
-            xaxis: { tickangle: 45, automargin: true},
-            yaxis: {automargin: true},
-        }
-    
-        // Disposición de heatmaps
-        var layoutHeatMap = {
-            height: 500,
-            margin: {"t": 50, "b": 50, "l": 20, "r": 20},
-            xaxis: { tickangle: 45, tickmode: 'array', automargin: true},
-            yaxis: {tickmode: 'array', automargin: true},
-        };
-        
-        // CLASES
-        // Carga y transformación de datos JSON para gráfico de clases
-        var clases = JSON.parse('{{ distribucion_clases|default:"[]"|escapejs }}');
-        var data_clases = [{
-            x: clases.map(c => c[0]),
-            y: clases.map(c => c[1]),
-            type: 'bar',
-        }]
-        Plotly.newPlot('grafico-clases', data_clases, layoutBar, config);
-
-        // PROPIEDADES
-        var propiedades = JSON.parse('{{ distribucion_propiedades|default:"[]"|escapejs }}');
-        var data_propiedades = [{
-            x: propiedades.map(p => p[0]),
-            y: propiedades.map(p => p[1]),
-            type: 'bar',
-        }]
-        Plotly.newPlot('grafico-propiedades', data_propiedades, layoutBar, config);
-
-        // HEATMAP PROPIEDADES Y CLASES
-        // Transformación JSON para heatmaps
-        var propiedades_clases = JSON.parse('{{ relacion_propiedades_clases|default:"[]"|escapejs }}');
-
-        // Extraer las clases y propiedades en el orden en que aparecen en el JSON (de mayor a menor)
-        let clasesUnicas = [...new Map(propiedades_clases.map(r => [r[0], r[0]])).values()];
-        let propiedadesUnicas = [...new Map(propiedades_clases.map(r => [r[1], r[1]])).values()];
-        // Crear matriz Z vacía 
-        let matrizZ = clasesUnicas.map(() => new Array(propiedadesUnicas.length).fill(0));
-
-        // Rellenar matriz Z con valores ordenados
-        propiedades_clases.forEach(r => {
-            let claseIndex = clasesUnicas.indexOf(r[0]);
-            let propiedadIndex = propiedadesUnicas.indexOf(r[1]);
-            matrizZ[claseIndex][propiedadIndex] = r[2]; // Asigna el número de ocurrencias
-        });
-
-        // Graficar el heatmap asegurando que lo más frecuente aparece arriba a la izquierda
-        Plotly.newPlot('heatmap_propiedades_clases', [{
-            x: propiedadesUnicas,  // Dejamos el orden original para que los más frecuentes queden a la izquierda
-            y: clasesUnicas.reverse(),  // Invertimos solo el eje Y para que los más frecuentes estén arriba
-            z: matrizZ.reverse(), // Invertimos las filas para que el orden se mantenga
-            type: 'heatmap',
-            colorscale: 'Jet',
-            hoverongaps: false
-        }], layoutHeatMap, config);
-
-
-        // HEATMAP RELACIONES CLASES
-        var relaciones_clases = JSON.parse('{{ relacion_instancias_clases|default:"[]"|escapejs }}');
-
-        // Extraer clases 
-        let clasesOrigenDestino = [...new Map(relaciones_clases.flatMap(r => [[r[0], r[0]], [r[1], r[1]]])).values()];
-        // Crear matriz Z vacía
-        let matrizZClases = clasesOrigenDestino.map(() => new Array(clasesOrigenDestino.length).fill(0));
-
-        // Rellenar matriz Z con valores ordenados
-        relaciones_clases.forEach(r => {
-            let claseOrigen = clasesOrigenDestino.indexOf(r[0]);
-            let claseDestino = clasesOrigenDestino.indexOf(r[1]);
-            matrizZClases[claseOrigen][claseDestino] = r[2]; // Número total de relaciones
-        });
-
-        // Graficar el heatmap asegurando que lo más frecuente aparece arriba a la izquierda
-        Plotly.newPlot('heatmap_instancias_clases', [{
-            x: clasesOrigenDestino,  
-            y: clasesOrigenDestino.reverse(), 
-            z: matrizZClases.reverse(),  
-            type: 'heatmap',
-            colorscale: 'Jet',
-            hoverongaps: false
-        }], layoutHeatMap, config);
-    
     </script>
 
 {% endblock %}

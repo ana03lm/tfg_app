@@ -186,7 +186,6 @@ def cargar_json_dataset(selected_dataset):
 
 # ---
 # Genera una consulta SPARQL a partir de los parámetros proporcionados por el usuario
-# Se utiliza tanto para filtrar instancias en explorar_clase, como para busqueda en lenguaje natural
 def busqueda(filtro_clase, filtro_sujeto, filtro_propiedad, filtro_objeto, modo_filtro, clases_dict=None, uri_real_clase=None):
 
     # Si el modo de filtrado es AND, construimos una consulta donde todas las condiciones deben cumplirse
@@ -244,19 +243,16 @@ def busqueda(filtro_clase, filtro_sujeto, filtro_propiedad, filtro_objeto, modo_
         if filtro_objeto:
             condiciones_union.append(f'{{ ?s ?p ?o . FILTER(CONTAINS(LCASE(STR(?o)), LCASE("{filtro_objeto}"))) }}')
 
-        # Si estamos explorando una clase específica, aseguramos que todas las subconsultas mantengan la restricción
-        if uri_real_clase:
-            condiciones_union = [f'{{ ?s a <{uri_real_clase}> . {cond} }}' for cond in condiciones_union]
-
         # Se construye la consulta combinando las subconsultas con UNION
         # Asegurar que hay al menos una condición para evitar un UNION vacío
         if condiciones_union:
             query = f"""
                 SELECT DISTINCT ?s ?label WHERE {{
+                    {f"?s a <{uri_real_clase}> ." if uri_real_clase else ""}
                     {' UNION '.join(condiciones_union)}
                     OPTIONAL {{ ?s ?anyPredicate ?label . FILTER(REGEX(STR(?anyPredicate), "label", "i")) }}
                 }}
-                ORDER BY LCASE(STR(?label))  # Ordena alfabéticamente por label
+                ORDER BY LCASE(STR(?label))
             """
         else:
             # Si no hay filtros, obtener todas las instancias disponibles

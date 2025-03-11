@@ -1,0 +1,196 @@
+{% extends "base_generic.html" %}
+
+{% block title %}
+    <title> Estadísticas | TFG </title>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="estadisticas">
+
+    <div class="filtrado">
+
+        <!-- BARRA LATERAL DE FILTROS -->
+        <aside class="barra-filtros">
+            <h2>Filtros</h2>
+
+            <div class="busqueda-form" >
+            <form method="GET" class="busqueda-form">
+                <!--Para obtener siempre el dataset del que se solicita la información-->
+                <input type="hidden" name="dataset" value="{{ dataset }}">
+                
+                <!-- Select de clase base-->
+                <div class="busqueda-group">
+                    <label for="clase_base"> Clase base:</label>
+                    <select name="clase_base" id="busqueda_clase_base">
+                        <!--Por defecto, la clase base es "todas las clases"-->
+                        <option value="todas" {% if clase_base == "todas" or not clase_base %}selected{% endif %}>Todas las clases</option>
+                        {% for clase in clases_disponibles %}
+                            <option value="{{ clase }}" {% if clase_base == clase %}selected{% endif %}>{{ clase }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <hr>
+
+                <!--Select de clase adicional-->
+                <div class="busqueda-group">
+                    <label for="busqueda_clase">Buscar en Clase Adicional:</label>
+                    <select name="filtro_clase" id="busqueda_clase">
+                        <option value="">Seleccione una clase</option>
+                        {% for clase in clases_disponibles %}
+                            <option value="{{ clase }}" {% if filtro_clase == clase %}selected{% endif %}>{{ clase }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!--Input de texto para el sujeto-->
+                <div class="busqueda-group">
+                    <label for="busqueda_sujeto">Buscar Sujeto:</label>
+                    <input type="text" name="filtro_sujeto" id="busqueda_sujeto" value="{{ filtro_sujeto }}">
+                </div>
+
+                <!--Select propiedad-->
+                <div class="busqueda-group">
+                    <label for="busqueda_propiedad">Buscar por Propiedad:</label>
+                    <select name="filtro_propiedad" id="busqueda_propiedad">
+                        <option value="">Seleccione una propiedad</option>
+                        {% for propiedad, frecuencia in propiedades_disponibles.items %}
+                            <option value="{{ propiedad }}" {% if filtro_propiedad == propiedad %}selected{% endif %}>{{ propiedad }} ({{ frecuencia }}) </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!--Texto para el objeto-->
+                <div class="busqueda-group">
+                    <label for="busqueda_objeto">Buscar Objeto:</label>
+                    <input type="text" name="filtro_objeto" id="busqueda_objeto" value="{{ filtro_objeto }}">
+                </div>
+                
+                <!--Select para indicar modo de búsqueda (and/or). Por defecto AND-->
+                <div class="busqueda-group">
+                    <label for="modo_filtro">Modo de búsqueda:</label>
+                    <select name="modo_filtro" id="modo_filtro">
+                        <option value="AND" {% if modo_filtro == "AND" %}selected{% endif %}>Coincidir todos (AND)</option>
+                        <option value="OR" {% if modo_filtro == "OR" %}selected{% endif %}>Coincidir alguno (OR)</option>
+                    </select>
+                </div>
+
+                <div class="busqueda-botones">
+                    <button type="submit">Buscar</button>
+                    <button type="button" id="resetFilters">Limpiar</button>
+                </div>
+            </form>
+            </div>
+        </aside>
+
+    </div>
+
+    <!-- CONTENEDOR DE RESULTADOS -->
+    <div class="info"> 
+        <h1>Instancias</h1>
+
+        <!--Total instancias-->
+        <span class="total-instancias">Total: {{ num_instancias }}</span>
+        
+        <!--MUESTRA LOS FILTROS ACTIVOS Y PERMITE ELIMINARLOS INDIVIDUALMENTE O TODOS A LA VEZ-->
+        {% if clase_base != "todas" or filtro_clase or filtro_sujeto or filtro_propiedad or filtro_objeto %}
+            <div class="filtros-lista">
+                <span class= "tit-filtros"> Filtros:</span>
+
+                {% if clase_base != "todas" %}
+                    <span class="filtro-item">
+                        <span class= "tit-filtro"> Clase base:</span> {{ clase_base }} 
+                        <!--Enlace para eliminar el filtro seleccionado si se pulsa la X-->
+                        <a href="{{ request.path }}?dataset={{ dataset }}&filtro_clase={{ filtro_clase }}&filtro_sujeto={{ filtro_sujeto }}&filtro_propiedad={{ filtro_propiedad }}&filtro_objeto={{ filtro_objeto }}&modo_filtro={{ modo_filtro }}">x</a>
+                    </span>
+                {% endif %}
+                {% if filtro_clase %}
+                    <span class="filtro-item">
+                        <span class= "tit-filtro"> Clase adicional:</span> {{ filtro_clase }} 
+                        <a href="{{ request.path }}?dataset={{ dataset }}&clase_base={{ clase_base }}&filtro_sujeto={{ filtro_sujeto }}&filtro_propiedad={{ filtro_propiedad }}&filtro_objeto={{ filtro_objeto }}&modo_filtro={{ modo_filtro }}">x</a>
+                    </span>
+                {% endif %}
+                {% if filtro_sujeto %}
+                    <span class="filtro-item">
+                        <span class= "tit-filtro"> Sujeto:</span> {{ filtro_sujeto }}
+                        <a href="{{ request.path }}?dataset={{ dataset }}&clase_base={{ clase_base }}&filtro_clase={{ filtro_clase }}&filtro_propiedad={{ filtro_propiedad }}&filtro_objeto={{ filtro_objeto }}&modo_filtro={{ modo_filtro }}">x</a>
+                    </span>
+                {% endif %}
+                {% if filtro_propiedad %}
+                    <span class="filtro-item">
+                        <span class= "tit-filtro"> Propiedad:</span> {{ filtro_propiedad }} 
+                        <a href="{{ request.path }}?dataset={{ dataset }}&clase_base={{ clase_base }}&filtro_clase={{ filtro_clase }}&filtro_sujeto={{ filtro_sujeto }}&filtro_objeto={{ filtro_objeto }}&modo_filtro={{ modo_filtro }}">x</a>
+                    </span>
+                {% endif %}
+                {% if filtro_objeto %}
+                    <span class="filtro-item">
+                        <span class= "tit-filtro"> Objeto:</span> {{ filtro_objeto }}
+                        <a href="{{ request.path }}?dataset={{ dataset }}&clase_base={{ clase_base }}&filtro_clase={{ filtro_clase }}&filtro_sujeto={{ filtro_sujeto }}&filtro_propiedad={{ filtro_propiedad }}&modo_filtro={{ modo_filtro }}">x</a>
+                    </span>
+                {% endif %}
+
+                <!-- Enlace para borrar todos los filtros -->
+                <a class="borrar-todo" href="{{ request.path }}?dataset={{ dataset }}">Borrar todo</a>
+            </div>           
+        {% endif %}
+
+        <!--LISTADO DE INSTANCIAS-->
+        {% if instancias %}
+        <ul>
+            {% for instancia in instancias %}
+                <!--Enlace para poder visitar la página de la instancia-->
+                <li><a href="{% url 'visualizar_instancia' %}?dataset={{ dataset }}&uri={{ instancia.uri|urlencode }}&nombre={{instancia.nombre|urlencode}}">
+                    {{ instancia.nombre }}</a></li>
+            {% endfor %}
+        </ul>
+
+        <!-- CONTROLES DE PAGINACIÓN -->
+        <div class="pagination">
+            {% if instancias.has_previous %}
+                <a href="?page=1&{{ request.GET.urlencode }}">⬅⬅ Primera</a>
+                <a href="?page={{ instancias.previous_page_number }}&{{ request.GET.urlencode }}">⬅ Anterior</a>
+            {% endif %}
+
+            <span>Página {{ instancias.number }} de {{ instancias.paginator.num_pages }}</span>
+
+            {% if instancias.has_next %}
+                <a href="?page={{ instancias.next_page_number }}&{{ request.GET.urlencode }}">Siguiente ➡</a>
+                <a href="?page={{ instancias.paginator.num_pages }}&{{ request.GET.urlencode }}">Última ➡➡</a>
+            {% endif %}
+        </div>
+
+        {% else %}
+            <!--Mensaje si no hay resultados para la búsqueda-->
+            <p>No hay instancias de esta clase en el dataset.</p>
+        {% endif %}
+    </div>
+
+</div>
+
+ <!-- JavaScript para los filtros-->
+ {% load static %}
+ <!-- Cargar jQuery primero -->
+ <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+ <!-- Carga Select2 para mejorar los desplegables. Plugin de JQuery -->
+ <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+ <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+ <!-- JavaScript para inicializar Select2 y limpiar los filtros mediante el botón-->
+ <script>
+     // Inicializar Select2 en los desplegables
+     $(document).ready(function() {
+         $('#busqueda_clase, #busqueda_propiedad, #busqueda_clase_base').select2({
+             placeholder: "Seleccione una opción",
+             allowClear: true,
+             width: '100%'
+         });
+
+         // Botón para limpiar filtros
+         $('#resetFilters').click(function() {
+             window.location.href = window.location.pathname + "?dataset={{ dataset }}";
+         });
+     });
+ </script>
+
+{% endblock %}

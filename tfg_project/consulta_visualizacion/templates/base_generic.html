@@ -14,24 +14,8 @@
         <!-- Menú principal -->
         <nav>
             <ul>
-                <li><a href="{% url 'index' %}?dataset={{ dataset }}">Inicio</a></li>
-
-                <!-- Menú de exploración con clases dinámicas cargadas desde JSON -->
-                <li>
-                    <details>
-                        <summary>Exploración</summary>
-                        <ul>
-                            {% if clases_json and clases_json|length > 0 %}
-                                {% for label, uri in clases_json.items %}
-                                    <li><a href="{% url 'explorar_clase' clase=label %}?dataset={{ dataset }}">{{ label }}</a></li>
-                                {% endfor %}
-                            {% else %}
-                                <li>No hay clases disponibles</li>
-                            {% endif %}
-                        </ul>
-                    </details>
-                </li>
-                <li><a href="{% url 'busqueda_natural' %}?dataset={{ dataset }}"> Búsqueda </a></li>
+                <li><a href="{% url 'index' %}?dataset={{ dataset }}">Inicio</a></li>               
+                <li><a href="{% url 'estadisticas' %}?dataset={{ dataset }}">Estadísticas</a></li>
                 <li><a href="{% url 'consulta_sparql' %}?dataset={{ dataset }}">Consulta SPARQL</a></li>
                 <li>Ayuda</li>
             </ul>

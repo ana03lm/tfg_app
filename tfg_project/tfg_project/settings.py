@@ -64,7 +64,6 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "consulta_visualizacion.context_processors.clases",  # Agregamos aquí la función del context processor para pasar los datos a todas las plantillas
             ],
         },
     },
