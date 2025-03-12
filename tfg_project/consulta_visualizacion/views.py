@@ -92,11 +92,18 @@ def eliminar_dataset(request):
         if dataset_seleccionado:
             url = f"{URL_FUSEKI}/$/datasets/{dataset_seleccionado}"
             try:
-                # Se elimina
+                # Eliminar el JSON relacionado si existe
+                json_path = os.path.join("json_cache", f"{dataset_seleccionado}.json")
+                if os.path.exists(json_path):
+                    os.remove(json_path) 
+                
+                # Se elimina el dataset
                 response = requests.delete(url)
+                
                 # Si funciona, se redirige a index
                 if response.status_code in [200, 204]:
                     return redirect("index") 
+                
                 else:
                     # Si hay error, se muestra un mensaje en la plantilla
                     error_msg = f"Error al eliminar el dataset: {response.status_code} {response.text}"
@@ -167,6 +174,11 @@ def vista_generar_json(request):
     selected_dataset = request.GET.get("dataset") or request.POST.get("dataset")
 
     if selected_dataset:
+        # Eliminar el JSON anterior antes de generar uno nuevo
+        json_path = os.path.join("json_cache", f"{selected_dataset}.json")
+        if os.path.exists(json_path):
+            os.remove(json_path)  # Borra el JSON anterior para forzar la generación de uno nuevo, para cuando se pulse el botón de actualizar
+            
         # Inicia la generación en un hilo separado
         thread = threading.Thread(target=generar_json_en_segundo_plano, args=(selected_dataset,))
         thread.start()

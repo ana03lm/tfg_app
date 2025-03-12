@@ -1,0 +1,75 @@
+{% extends "base_generic.html" %}
+
+{% block title %}
+<title>Ayuda | TFG</title>
+{% endblock %}
+
+{% block content %}
+<div class="help-container">
+    <h1>Centro de Ayuda</h1>
+    <p>Bienvenido al centro de ayuda de la aplicación. Aquí encontrarás información sobre cómo utilizar las principales funcionalidades.</p>
+
+    <h2>1. Subida de Datasets</h2>
+    <p>Para cargar un nuevo conjunto de datos RDF en la aplicación:</p>
+    <ul>
+        <li>Dirígete a la página de <a href="{% url 'subida' %}?dataset={{ request.GET.dataset }}">Subida de Datos</a>.</li>
+        <li>Selecciona un archivo en formato RDF (.ttl, .rdf, .nt).</li>
+        <li>Haz clic en "Subir Archivo".</li>
+        <li>El sistema procesará el archivo y generará un resumen de los datos.</li>
+    </ul>
+
+    <h2>2. Selección y Visualización de Datos</h2>
+    <p>Para explorar un dataset cargado en la plataforma:</p>
+    <ul>
+        <li>Desde la <a href="{% url 'index' %}?dataset={{ request.GET.dataset }}">página principal</a>, selecciona un dataset del desplegable.</li>
+        <li>Accede a la sección de <a href="{% url 'estadisticas' %}?dataset={{ request.GET.dataset }}">Estadísticas</a> para visualizar métricas y gráficos.</li>
+    </ul>
+
+    <h2>3. Filtrado de Instancias</h2>
+    <p>Para encontrar información específica dentro de un dataset:</p>
+    <ul>
+        <li>Accede a la página de <a href="{% url 'estadisticas' %}?dataset={{ request.GET.dataset }}">Estadísticas</a>.</li>
+        <li>Usa la barra lateral de filtros para buscar por clase, sujeto, propiedad u objeto.</li>
+        <li>Aplica filtros adicionales usando los modos AND u OR.</li>
+        <li>Haz clic en "Buscar" para ver los resultados.</li>
+    </ul>
+    
+    <h3>¿Qué es la clase base?</h3>
+    <p>La clase base define el conjunto principal de instancias sobre el cual se aplicarán el resto de los filtros. Si seleccionas una clase base, todas las instancias mostradas pertenecerán a esa clase. Luego, puedes aplicar otros filtros adicionales para refinar los resultados, combinándolos mediante AND u OR.</p>
+    </br>
+    <p>Ejemplo: Si trabajas con un dataset sobre películas y seleccionas "Película" como clase base, todas las instancias mostradas serán películas. Luego, podrías aplicar filtros como "director" o "año de estreno" para reducir aún más la búsqueda. Serán estos otros filtros a los que se aplique el modo de búsqueda seleccionado, pero la clase base se mantiene "fija" a pesar de que se utilice OR.</p>
+    <h3>Diferencia entre modos de búsqueda AND y OR:</h3>
+    <ul>
+        <li><strong>AND:</strong> Se muestran solo las instancias que cumplen con todos los filtros aplicados simultáneamente.</li>
+        <li><strong>OR:</strong> Se muestran las instancias que cumplen al menos uno de los filtros aplicados. Sin embargo, la clase base no se ve afectada por esta condición y sigue actuando como filtro fijo.</li>
+    </ul>
+
+    <h2>4. Visualización de Instancias</h2>
+    <p>Para obtener detalles sobre una instancia específica:</p>
+    <ul>
+        <li>Tras aplicar un filtro, haz clic en el nombre de una instancia en la lista de resultados.</li>
+        <li>Se mostrará una página con las propiedades y valores de la instancia.</li>
+        <li>Si hay enlaces a otras instancias, podrás navegar entre ellas.</li>
+    </ul>
+
+    <h2>5. Consulta de Datos con SPARQL</h2>
+    <p>Si deseas realizar consultas avanzadas sobre los datos RDF:</p>
+    <ul>
+        <li>Ve a la <a href="{% url 'consulta_sparql' %}?dataset={{ request.GET.dataset }}">página de consulta SPARQL</a>.</li>
+        <li>Introduce tu consulta en el editor.</li>
+        <li>Haz clic en "Ejecutar Consulta".</li>
+        <li>Los resultados se mostrarán en formato tabla y se podrán exportar en CSV, TSV o JSON.</li>
+    </ul>
+
+    <h2>6. Eliminación y Actualización de Datasets</h2>
+    <p>Si necesitas actualizar o eliminar un dataset:</p>
+    <ul>
+        <li>Desde la <a href="{% url 'index' %}?dataset={{ request.GET.dataset }}">página principal</a>, selecciona un dataset.</li>
+        <li>Usa los botones "Actualizar dataset" o "Eliminar dataset".</li>
+        <li>Si decides eliminar un dataset, se pedirá confirmación antes de proceder.</li>
+    </ul>
+
+</div>
+{% endblock %}
+
+

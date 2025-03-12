@@ -18,15 +18,17 @@
     <!--Comprobar el estado de la generación del JSON cada 2 segundos y actualizar dinámicamente el mensaje de carga en la pantalla-->
     <script>
         function checkStatus() {
+            let dataset = "{{ dataset }}"; // Obtener el dataset desde Django 
+
             // Petición a la vista verificar_json
-            fetch("{% url 'verificar_json' %}?dataset={{ dataset }}")
+            fetch("{% url 'verificar_json' %}?dataset="+ dataset)
                 // Convierte respuesta a JSON
                 .then(response => response.json())
                 //Verifica estado 
                 .then(data => {
                     // Si exists es TRUE, significa que se ha generado el JSON y redirige a index
                     if (data.exists) {
-                        window.location.href = "{% url 'index' %}";
+                        window.location.replace("{% url 'index' %}?dataset=" + encodeURIComponent(dataset));
                     } else if (data.generating) { // Si sigue en proceso, actualiza mensaje de carga y vuelve a llamar a la función en 2 segundos
                         document.getElementById("loading-message").innerText = data.progress;
                         setTimeout(checkStatus, 2000);
