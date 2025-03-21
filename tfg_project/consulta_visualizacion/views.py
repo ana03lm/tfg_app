@@ -344,6 +344,47 @@ def estadisticas (request):
         "propiedades_disponibles": sorted(list(propiedades_dict.keys())),
     })
 
+# Exportación de resultados de filtrado a formato .ttl
+def exportar_filtrado_ttl(request):
+    # Obtener dataset
+    dataset = request.GET.get("dataset")
+    if not dataset:
+        return HttpResponse("Dataset no especificado", status=400)
+
+    # Obtener filtros desde la URL
+    clase_base = request.GET.get('clase_base', 'todas').strip()
+    filtro_clase = request.GET.get("filtro_clase", "").strip()
+    filtro_sujeto = request.GET.get("filtro_sujeto", "").strip()
+    filtro_propiedad = request.GET.get("filtro_propiedad", "").strip()
+    filtro_objeto = request.GET.get("filtro_objeto", "").strip()
+    modo_filtro = request.GET.get("modo_filtro", "AND")
+
+    # Obtener clases
+    dataset_data = utils.cargar_json_dataset(dataset)
+    clases_dict = dataset_data.get("clases", {}) if dataset_data else {}
+    uri_real_clase = clases_dict.get(clase_base, None) if clase_base != "todas" else None
+
+    # Construir consulta SELECT con filtros
+    query_select = utils.busqueda(filtro_clase, filtro_sujeto, filtro_propiedad, filtro_objeto, modo_filtro, clases_dict, uri_real_clase)
+    sparql = SPARQLQuery(dataset)
+    resultado = sparql.ejecutar_consulta(query_select)
+
+    # Extraer URIs de las instancias
+    uris = [binding["s"]["value"] for binding in resultado["results"]["bindings"]]
+
+    # Construir consulta DESCRIBE
+    describe_query = "DESCRIBE " + " ".join(f"<{uri}>" for uri in uris)
+
+    # Ejecutar consulta DESCRIBE y devolver los resultados en formato Turtle
+    sparql.sparql.setQuery(describe_query)
+    sparql.sparql.setReturnFormat("turtle")
+    resultados_ttl = sparql.sparql.query().convert()
+    
+    # Permitir la descarga del archivo
+    response = HttpResponse(resultados_ttl, content_type="text/turtle")
+    response["Content-Disposition"] = 'attachment; filename="resultados_filtrados.ttl"'
+    return response
+
 # ---
 # Visualización de propiedades y valores de cada instancia
 def visualizar_instancia(request):

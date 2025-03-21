@@ -135,6 +135,15 @@
                 <a class="borrar-todo" href="{{ request.path }}?dataset={{ dataset }}">Borrar todo</a>
             </div>           
         {% endif %}
+        
+        <!--Formulario de exportación de resultados-->
+        <form id="exportFormTTL" method="GET" action="{% url 'exportar_filtrado_ttl' %}">
+            {% for key, value in request.GET.items %}
+                <input type="hidden" name="{{ key }}" value="{{ value }}">
+            {% endfor %}
+            <label for="formato">Exportación de resultados en formato .ttl:</label>
+            <button type="submit">Exportar</button>
+        </form>
 
         <!--LISTADO DE INSTANCIAS-->
         {% if instancias %}
