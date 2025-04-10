@@ -5,7 +5,8 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Dataset: {{dataset}}</h1>
+    <h1>Dataset: <span id="titulo-dataset" class="escritura">  </span> </h1>
+    <p id="mensaje-carga" class="mensaje-dataset oculto">✓ Dataset cargado correctamente</p>
 
     <div class="contenedor-formularios">
         <!-- Formulario para seleccionar dataset -->
@@ -46,6 +47,32 @@
   
     <!--Al cargar el dataset se controla si tiene JSON o no para crearlo-->
     <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+            if (sessionStorage.getItem("cambioDataset")) {
+                sessionStorage.removeItem("cambioDataset");
+        
+                const h1 = document.getElementById("titulo-dataset");
+                const texto = "{{ dataset }}";
+                let i = 0;
+        
+                function escribir() {
+                    if (i < texto.length) {
+                        h1.innerHTML += texto.charAt(i);
+                        i++;
+                        setTimeout(escribir, 50); // velocidad
+                    }
+                }
+        
+                escribir();
+                const mensaje = document.getElementById("mensaje-carga");
+                if (mensaje) {mensaje.classList.add("mostrar");}
+            } else {
+                // Si no ha habido cambio, simplemente muestra el texto normal
+                document.getElementById("titulo-dataset").textContent = "{{ dataset }}";
+            }
+        });
+
         document.querySelector("form[method='GET']").addEventListener("submit", function(event) {
             event.preventDefault(); // Detiene el envío del formulario para ejecutar las funciones
     
@@ -56,6 +83,9 @@
             fetch("{% url 'verificar_json' %}?dataset=" + dataset)
                 .then(response => response.json())
                 .then(data => {
+                    // Guardar la acción en sessionStorage para activar la animación al volver
+                    sessionStorage.setItem("cambioDataset", "1");
+
                     if (data.exists) {
                         // Si el JSON existe, redirige directamente al index con el dataset seleccionado
                         window.location.href = "{% url 'index' %}?dataset=" + dataset;

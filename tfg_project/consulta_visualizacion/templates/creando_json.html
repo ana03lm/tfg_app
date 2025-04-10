@@ -28,6 +28,7 @@
                 .then(data => {
                     // Si exists es TRUE, significa que se ha generado el JSON y redirige a index
                     if (data.exists) {
+                        sessionStorage.setItem("cambioDataset", "1"); // Para que aparezca la animación de carga del dataset
                         window.location.replace("{% url 'index' %}?dataset=" + encodeURIComponent(dataset));
                     } else if (data.generating) { // Si sigue en proceso, actualiza mensaje de carga y vuelve a llamar a la función en 2 segundos
                         document.getElementById("loading-message").innerText = data.progress;

@@ -73,6 +73,14 @@ nav a:hover{
   color: blue;
 }
 
+nav a.active {
+  border-bottom: 3px solid blue;
+  color: blue;
+  padding-bottom: 2px;
+  font-weight: bold;
+}
+
+
 /* Paginación */
 .pagination {
   text-align: center;
@@ -159,40 +167,6 @@ select {
 .helptext{
   font-size: 15px;
   margin: 10px 0;
-}
-
-/* Formulario index*/
-.contenedor-formularios {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-}
-
-.formularios_index {
-  background: white;
-  padding: 35px 25px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  width: 100%;
-  max-width: 500px;
-}
-
-.formulario_dataset button{
-  margin-top: 40px;
-}
-
-#acciones-dataset {
-  display: flex;
-  justify-content: center; 
-  gap: 20px;
-  margin-top: 20px;
-}
-
-#acciones-dataset button {
-  display: inline-block;
-  width: 160px;
-  margin: 0;
 }
 
 /* Formulario de consulta SPARQL */
@@ -294,6 +268,75 @@ select {
   margin: auto;
   margin-top: 5px;
   margin-bottom: 10px;
+}
+
+/* Index*/
+.contenedor-formularios {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.formularios_index {
+  background: white;
+  padding: 35px 25px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 100%;
+  max-width: 500px;
+}
+
+.formulario_dataset button{
+  margin-top: 40px;
+}
+
+#acciones-dataset {
+  display: flex;
+  justify-content: center; 
+  gap: 20px;
+  margin-top: 20px;
+}
+
+#acciones-dataset button {
+  display: inline-block;
+  width: 160px;
+  margin: 0;
+}
+
+/* Título */
+#titulo-dataset {
+  font-size: 28px;
+  color: #2c3e50;
+  text-align: center;
+  min-height: 1.5em;
+  font-weight: bold;
+}
+
+/* Mensaje debajo del título */
+.mensaje-dataset {
+  display: none;
+  text-align: center;
+  font-size: 16px;
+  font-weight: bold;
+  color: #155724;
+  margin-top: 10px;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+/* Animación para que aparezca y desaparezca el mensaje */
+.mensaje-dataset.mostrar {
+  display: block;
+  opacity: 1;
+  animation: desaparecer 2.5s ease 3s forwards;
+}
+
+@keyframes desaparecer {
+  to {
+    opacity: 0;
+    display: none;
+  }
 }
 
 

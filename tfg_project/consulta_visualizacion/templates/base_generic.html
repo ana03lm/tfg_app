@@ -14,13 +14,13 @@
         <!-- Menú principal -->
         <nav>
             <ul>
-                <li><a href="{% url 'index' %}?dataset={{ request.GET.dataset }}">Inicio</a></li>               
-                <li><a href="{% url 'estadisticas' %}?dataset={{ request.GET.dataset }}">Estadísticas</a></li>
-                <li><a href="{% url 'consulta_sparql' %}?dataset={{ request.GET.dataset }}">Consulta SPARQL</a></li>
-                <li><a href="{% url 'ayuda' %}?dataset={{ request.GET.dataset }}">Ayuda </a></li>
+              <li><a href="{% url 'index' %}?dataset={{ request.GET.dataset }}" class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">Inicio</a></li>
+              <li><a href="{% url 'estadisticas' %}?dataset={{ request.GET.dataset }}" class="{% if request.resolver_match.url_name == 'estadisticas' %}active{% endif %}">Estadísticas</a></li>
+              <li><a href="{% url 'consulta_sparql' %}?dataset={{ request.GET.dataset }}" class="{% if request.resolver_match.url_name == 'consulta_sparql' %}active{% endif %}">Consulta SPARQL</a></li>
+              <li><a href="{% url 'ayuda' %}?dataset={{ request.GET.dataset }}" class="{% if request.resolver_match.url_name == 'ayuda' %}active{% endif %}">Ayuda</a></li>
             </ul>
-        </nav>
-        
+          </nav>
+                
         {% block content %} {% endblock %}
   
     </body>
