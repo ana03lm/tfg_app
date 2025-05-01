@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# tfg_project
-=======
 # Aplicación para la Consulta y Visualiación de Datos Semánticos RDF
 
 Este proyecto es una **aplicación web desarrollada con Django** que permite la **consulta, exploración y visualización de conjuntos de datos RDF** almacenados en Apache Jena Fuseki. Su objetivo es facilitar la comprensión y análisis de grandes datasets semánticos mediante métricas, filtros y visualizaciones interactivas, así como permitir consultas SPARQL avanzadas.
@@ -26,7 +23,7 @@ Este proyecto es una **aplicación web desarrollada con Django** que permite la 
 
 ---
 
-## 🔧 Instalación y despliegue
+## Instalación y despliegue
 
 ### Requisitos previos
 Antes de instalar, es necesario tener lo siguiente instalado en tu máquina:
