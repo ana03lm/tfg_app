@@ -25,16 +25,18 @@ Este proyecto es una **aplicación web desarrollada con Django** que permite la 
 
 ## Requisitos del sistema
 Antes de comenzar, asegúrate de tener instalado lo siguiente en tu ordenador:
-- **Python 3.8 o superior:** https://www.python.org/downloads/
-- **`pip`:** ya viene incluido con Python
+- **Python 3.8 o superior (se recomienda 3.12):** https://www.python.org/downloads/
 - **Git:** https://git-scm.com/
-- **Apache Jena Fuseki:**https://jena.apache.org/download/index.cgi
+- **Java 17 o superior:** https://www.oracle.com/es/java/technologies/downloads/
+Java es necesario para que funcione Apache Jena Fuseki. En el enlace incluido selecciona la versión 17 o superior, tu sistema operativo y descarga preferiblemente un archivo instalador.
+
 > Puedes comprobar si están instalados abriendo una terminal (o símbolo del sistema) y escribiendo:
 >
 > ```bash
 > python --version
 > pip --version
 > git --version
+> java -version
 > ```
 
 ---
@@ -72,7 +74,7 @@ pip install requests
 
 ### 4. Descargar e iniciar Apache Jena Fuseki
 A continuación, debes desplegar Apache Jena Fuseki, que es donde se van a guardar los conjuntos de datos en la aplicación:
-1. Descarga la última versión desde: https://jena.apache.org/download/index.cgi
+1. Descarga el siguiente archivo: https://dlcdn.apache.org/jena/binaries/apache-jena-fuseki-5.4.0.zip
 2. Extrae el archivo `.zip` en una carpeta de tu ordenador.
 3. Abre **una nueva terminal** y navega hasta esa carpeta: 
   ```bash
