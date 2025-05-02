@@ -42,7 +42,7 @@ Antes de comenzar, asegúrate de tener instalado lo siguiente en tu ordenador:
 ## Instalación y despliegue
 
 ### 1. Clonar el repositorio
-En primer lugar, abre una terminal y ejecuta:: 
+En primer lugar, abre una terminal y ejecuta: 
 ```bash
 git clone https://github.com/ana03lm/tfg_app.git
 cd tfg_app
@@ -52,15 +52,15 @@ Esto descargará todos los archivos necesarios en tu ordenador.
 ### 2. Crear un entorno virtual
 Posteriormente, es recomendable crear un entorno virtual mediante los siguientes comandos.
 - En Windows:
-```bash
-python -m venv venv
-venv\Scripts\activate
-```
+  ```bash
+  python -m venv venv
+  venv\Scripts\activate
+  ```
 - En Linux/macOS:
-```bash
-python -m venv venv
-source venv/bin/activate
-```
+  ```bash
+  python -m venv venv
+  source venv/bin/activate
+  ```
 
 ### 3. Instalar dependencias del proyecto
 Con el entorno virtual activado, instala las bibliotecas necesarias:
@@ -75,18 +75,18 @@ A continuación, debes desplegar Apache Jena Fuseki, que es donde se van a guard
 1. Descarga la última versión desde: https://jena.apache.org/download/index.cgi
 2. Extrae el archivo `.zip` en una carpeta de tu ordenador.
 3. Abre **una nueva terminal** y navega hasta esa carpeta: 
-```bash
-cd cd ruta/donde/guardaste/apache-jena-fuseki
-```
+  ```bash
+  cd ruta/donde/guardaste/apache-jena-fuseki
+  ```
 4. Inicia el servidor con el siguiente comando:
 - En Windows:
-```bash
-fuseki-server.bat --update --tdb2
-```
+  ```bash
+  fuseki-server.bat --update --tdb2
+  ```
 - En Linux/macOS:
-```bash
-./fuseki-server --update --tdb2
-```
+  ```bash
+  ./fuseki-server --update --tdb2
+  ```
 Esto iniciará Fuseki en modo escritura y con persistencia de datos.
 5. Abre tu navegador y accede a: http://localhost:3030/
 Si ves el panel de Fuseki, ¡todo está funcionando correctamente!
@@ -112,13 +112,13 @@ Cada vez que apagues el ordenador o cierres todo, necesitarás replicar parte de
    ```
 3. Ejecuta:
   - En Windows:
-```bash
-fuseki-server.bat --update --tdb2
-```
+    ```bash
+    fuseki-server.bat --update --tdb2
+    ```
 - En Linux/macOS:
-```bash
-./fuseki-server --update --tdb2
-```
+  ```bash
+  ./fuseki-server --update --tdb2
+  ```
 
 **No cierres esta ventana** mientras uses la aplicación.
 
