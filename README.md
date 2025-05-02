@@ -1,19 +1,10 @@
-# Aplicación para la Consulta y Visualiación de Datos Semánticos RDF
+# Aplicación para la Consulta y Visualización de Datos Semánticos RDF
 
 Este proyecto es una **aplicación web desarrollada con Django** que permite la **consulta, exploración y visualización de conjuntos de datos RDF** almacenados en Apache Jena Fuseki. Su objetivo es facilitar la comprensión y análisis de grandes datasets semánticos mediante métricas, filtros y visualizaciones interactivas, así como permitir consultas SPARQL avanzadas.
 
 ---
 
-## Tecnologías utilizadas
-
-- **Frontend**: Django Templates, HTML5/CSS3, Plotly.js, jQuery
-- **Backend**: Django 4.2 (Python)
-- **Triplestore**: Apache Jena Fuseki
-- **Conexión SPARQL**: SPARQLWrapper
-
----
-
-## Funcionalidades principales
+## Funcionalidades principales de la aplicación
 
 - Subida de archivos RDF (`.ttl`, `.rdf`, `.nt`)
 - Generación automática de estadísticas y dashboard
@@ -23,56 +14,126 @@ Este proyecto es una **aplicación web desarrollada con Django** que permite la 
 
 ---
 
+## Tecnologías utilizadas
+
+- **Frontend**: Django Templates, HTML5/CSS3, Plotly.js, jQuery
+- **Backend**: Django 4.2 (Python)
+- **Triplestore**: Apache Jena Fuseki
+- **Conexión SPARQL**: SPARQLWrapper (Python)
+
+---
+
+## Requisitos del sistema
+Antes de comenzar, asegúrate de tener instalado lo siguiente en tu ordenador:
+- **Python 3.8 o superior:** [https://www.python.org/downloads/] (https://www.python.org/downloads/)
+- **`pip`:** ya viene incluido con Python
+- **Git:** [https://git-scm.com/] (https://git-scm.com/)
+- **Apache Jena Fuseki:**[https://jena.apache.org/download/index.cgi] (https://jena.apache.org/download/index.cgi)
+> Puedes comprobar si están instalados abriendo una terminal (o símbolo del sistema) y escribiendo:
+>
+> ```bash
+> python --version
+> pip --version
+> git --version
+> ```
+
+---
+  
 ## Instalación y despliegue
 
-### Requisitos previos
-Antes de instalar, es necesario tener lo siguiente instalado en tu máquina:
-- Python 3.0 o superior
-- Django
-- Apache Jena Fuseki
-- Git
-- Pip (gestor de paquetes de Python)
-  
 ### 1. Clonar el repositorio
-
+En primer lugar, abre una terminal y ejecuta:: 
 ```bash
 git clone https://github.com/ana03lm/tfg_app.git
-cd tfg_app.git
+cd tfg_app
 ````
+Esto descargará todos los archivos necesarios en tu ordenador.
 
 ### 2. Crear un entorno virtual
+Posteriormente, es recomendable crear un entorno virtual mediante los siguientes comandos.
+- En Windows:
 ```bash
 python -m venv venv
-source venv/bin/activate     # Linux / macOS
-.\venv\Scripts\activate      # Windows
+venv\Scripts\activate
+```
+- En Linux/macOS:
+```bash
+python -m venv venv
+source venv/bin/activate
 ```
 
 ### 3. Instalar dependencias del proyecto
-Ejecuta el siguiente comando para instalar los paquetes:
+Con el entorno virtual activado, instala las bibliotecas necesarias:
 ```bash
 pip install django==4.2
 pip install SPARQLWrapper==1.8.5
 pip install requests
 ```
 
-### 4. Instalar y ejecutar Apache Jena Fuseki
-Ejecuta el siguiente comando para instalar los paquetes:
-1. Descarga Fuseki desde: https://jena.apache.org/download/index.cgi
-2. Extrae el contenido del ZIP descargado.
-3. Accede al directorio y ejecuta el servidor:
+### 4. Descargar e iniciar Apache Jena Fuseki
+A continuación, debes desplegar Apache Jena Fuseki, que es donde se van a guardar los conjuntos de datos en la aplicación:
+1. Descarga la última versión desde: https://jena.apache.org/download/index.cgi
+2. Extrae el archivo `.zip` en una carpeta de tu ordenador.
+3. Abre **una nueva terminal** y navega hasta esa carpeta: 
 ```bash
-cd apache-jena-fuseki-X.X.X
-./fuseki-server    # en Linux / macOS
-fuseki-server.bat  # en Windows
+cd cd ruta/donde/guardaste/apache-jena-fuseki
 ```
-Esto levanta un servidor en http://localhost:3030. Puedes acceder a través de cualquier navegador para comprobar que se ha ejecutado correctamente.
+4. Inicia el servidor con el siguiente comando:
+- En Windows:
+```bash
+fuseki-server.bat --update --tdb2
+```
+- En Linux/macOS:
+```bash
+./fuseki-server --update --tdb2
+```
+Esto iniciará Fuseki en modo escritura y con persistencia de datos.
+5. Abre tu navegador y accede a: [http://localhost:3030/] (http://localhost:3030/)
+Si ves el panel de Fuseki, ¡todo está funcionando correctamente!
 
 ### 5. Ejecutar la aplicación Django
-Finalmente, cuando tienes ya todo instalado, puedes poner en marcha la aplicación con el siguiente comando:
+Vuelve a la terminal donde clonaste el repositorio (o abre una nueva y ve a la carpeta del proyecto):
+```bash
+cd ruta/del/proyecto
+```
+Asegúrate de que el entorno virtual esté activado y ejecuta:
 ```bash
 python manage.py runserver
 ```
-Ahora, puedes acceder desde cualquier navegador a la aplicación a través de esta dirección: http://127.0.0.1:8000
+Ahora ya puedes abrir tu navegador y visitar la aplicación en: [http://127.0.0.1:8000] (http://127.0.0.1:8000)
+
+## Cómo volver a iniciar la aplicación
+Cada vez que apagues el ordenador o cierres todo, necesitarás replicar parte del paso 4 y 5 anteriormente explicados para iniciar Apache Jena Fuseki y Django. A continuación se explica paso a paso:
+### 1. Apache Jena Fuseki
+1. Abre una terminal
+2. Navega hasta la carpeta donde tengas Fuseki:
+   ```bash
+   cd ruta/donde/guardaste/apache-jena-fuseki
+   ```
+3. Ejecuta:
+  - En Windows:
+```bash
+fuseki-server.bat --update --tdb2
+```
+- En Linux/macOS:
+```bash
+./fuseki-server --update --tdb2
+```
+
+**No cierres esta ventana** mientras uses la aplicación.
+
+### 2. La aplicación Django
+1. Abre otra terminal.
+2. Navega a la carpeta del proyecto:
+   ```bash
+   cd ruta/del/proyecto
+   ```
+3. Activa el entorno virtual (como en el paso 2).
+3. Ejecuta:
+   ```bash
+   python manage.py runserver
+   ```
+4. Abre tu navegador y accede a: [http://127.0.0.1:8000] (http://127.0.0.1:8000)
 
 ## Cómo utilizar la aplicación
 1. Ve a la pestaña "Subida" para cargar un nuevo dataset RDF.
@@ -84,7 +145,7 @@ Ahora, puedes acceder desde cualquier navegador a la aplicación a través de es
 7. Exporta los resultados de búsquedas o consultas si lo deseas.
 
 ## Ayuda
-Dentro de la aplicación encontrarás una sección de Ayuda accesible desde el menú de navegación, donde se explican todas las funcionalidades y cómo utilizarlas paso a paso.
+Dentro de la aplicación encontrarás una sección de **Ayuda** accesible desde el menú de navegación, donde se explican todas las funcionalidades y cómo utilizarlas paso a paso.
 
 ## Licencia
 Este proyecto está disponible bajo la licencia Creative Commons Zero v1.0 Universal (CC0 1.0). Puedes usar, modificar y compartir libremente el código.
