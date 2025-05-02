@@ -25,10 +25,10 @@ Este proyecto es una **aplicación web desarrollada con Django** que permite la 
 
 ## Requisitos del sistema
 Antes de comenzar, asegúrate de tener instalado lo siguiente en tu ordenador:
-- **Python 3.8 o superior:** [https://www.python.org/downloads/] (https://www.python.org/downloads/)
+- **Python 3.8 o superior:** https://www.python.org/downloads/
 - **`pip`:** ya viene incluido con Python
-- **Git:** [https://git-scm.com/] (https://git-scm.com/)
-- **Apache Jena Fuseki:**[https://jena.apache.org/download/index.cgi] (https://jena.apache.org/download/index.cgi)
+- **Git:** https://git-scm.com/
+- **Apache Jena Fuseki:**https://jena.apache.org/download/index.cgi
 > Puedes comprobar si están instalados abriendo una terminal (o símbolo del sistema) y escribiendo:
 >
 > ```bash
@@ -88,7 +88,7 @@ fuseki-server.bat --update --tdb2
 ./fuseki-server --update --tdb2
 ```
 Esto iniciará Fuseki en modo escritura y con persistencia de datos.
-5. Abre tu navegador y accede a: [http://localhost:3030/] (http://localhost:3030/)
+5. Abre tu navegador y accede a: http://localhost:3030/
 Si ves el panel de Fuseki, ¡todo está funcionando correctamente!
 
 ### 5. Ejecutar la aplicación Django
@@ -100,7 +100,7 @@ Asegúrate de que el entorno virtual esté activado y ejecuta:
 ```bash
 python manage.py runserver
 ```
-Ahora ya puedes abrir tu navegador y visitar la aplicación en: [http://127.0.0.1:8000] (http://127.0.0.1:8000)
+Ahora ya puedes abrir tu navegador y visitar la aplicación en: http://127.0.0.1:8000
 
 ## Cómo volver a iniciar la aplicación
 Cada vez que apagues el ordenador o cierres todo, necesitarás replicar parte del paso 4 y 5 anteriormente explicados para iniciar Apache Jena Fuseki y Django. A continuación se explica paso a paso:
@@ -133,7 +133,7 @@ fuseki-server.bat --update --tdb2
    ```bash
    python manage.py runserver
    ```
-4. Abre tu navegador y accede a: [http://127.0.0.1:8000] (http://127.0.0.1:8000)
+4. Abre tu navegador y accede a: http://127.0.0.1:8000
 
 ## Cómo utilizar la aplicación
 1. Ve a la pestaña "Subida" para cargar un nuevo dataset RDF.
