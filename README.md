@@ -130,16 +130,28 @@ Cada vez que apagues el ordenador o cierres todo, necesitarás replicar parte de
 
 ### 2. La aplicación Django
 1. Abre otra terminal.
-2. Navega a la subcarpeta tfg_project dentro del proyecto:
+2. Navega a la carpeta del proyecto:
    ```bash
-   cd ruta/tfg_app/tfg_project
+   cd ruta/tfg_app
    ```
-3. Activa el entorno virtual (como en el paso 2).
-3. Ejecuta:
+3. Activa el entorno virtual:
+  - En Windows:
+  ```bash
+  venv\Scripts\activate
+  ```
+- En Linux/macOS:
+  ```bash
+  source venv/bin/activate
+  ```
+4. Navega a la subcarpeta tfg_project:
+   ```bash
+   cd tfg_project
+   ```
+5. Ejecuta:
    ```bash
    python manage.py runserver
    ```
-4. Abre tu navegador y accede a: http://127.0.0.1:8000
+6. Abre tu navegador y accede a: http://127.0.0.1:8000
 
 ## Cómo utilizar la aplicación
 1. Ve a la pestaña "Subida" para cargar un nuevo dataset RDF.
