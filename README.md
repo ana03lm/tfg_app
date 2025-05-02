@@ -98,6 +98,10 @@ Vuelve a la terminal donde clonaste el repositorio (o abre una nueva y ve a la c
 ```bash
 cd ruta/del/proyecto
 ```
+Dirígete a la subcarpeta tfg_project:
+```bash
+cd ruta/del/proyecto
+```
 Asegúrate de que el entorno virtual esté activado y ejecuta:
 ```bash
 python manage.py runserver
@@ -126,9 +130,9 @@ Cada vez que apagues el ordenador o cierres todo, necesitarás replicar parte de
 
 ### 2. La aplicación Django
 1. Abre otra terminal.
-2. Navega a la carpeta del proyecto:
+2. Navega a la subcarpeta tfg_project dentro del proyecto:
    ```bash
-   cd ruta/del/proyecto
+   cd ruta/tfg_app/tfg_project
    ```
 3. Activa el entorno virtual (como en el paso 2).
 3. Ejecuta:
