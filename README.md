@@ -96,13 +96,22 @@ Si ves el panel de Fuseki, ¡todo está funcionando correctamente!
 ### 5. Ejecutar la aplicación Django
 Vuelve a la terminal donde clonaste el repositorio (o abre una nueva y ve a la carpeta del proyecto):
 ```bash
-cd ruta/del/proyecto
+cd ruta/tfg_app
 ```
+Asegúrate de que el entorno virtual esté activado con:
+ - En Windows:
+    ```bash
+    fuseki-server.bat --update --tdb2
+    ```
+- En Linux/macOS:
+  ```bash
+  ./fuseki-server --update --tdb2
+  ```
 Dirígete a la subcarpeta tfg_project:
 ```bash
-cd ruta/del/proyecto
+cd tfg_project
 ```
-Asegúrate de que el entorno virtual esté activado y ejecuta:
+Ejecuta:
 ```bash
 python manage.py runserver
 ```
