@@ -34,7 +34,6 @@ Java es necesario para que funcione Apache Jena Fuseki. En el enlace incluido se
 >
 > ```bash
 > python --version
-> pip --version
 > git --version
 > java -version
 > ```
@@ -53,16 +52,16 @@ Esto descargará todos los archivos necesarios en tu ordenador.
 
 ### 2. Crear un entorno virtual
 Posteriormente, es recomendable crear un entorno virtual mediante los siguientes comandos.
-- En Windows:
-  ```bash
-  python -m venv venv
-  venv\Scripts\activate
-  ```
-- En Linux/macOS:
-  ```bash
-  python -m venv venv
-  source venv/bin/activate
-  ```
+> En Windows:
+>  ```bash
+>  python -m venv venv
+>  venv\Scripts\activate
+>  ```
+>  En Linux/macOS:
+> ```bash
+> python -m venv venv
+> source venv/bin/activate
+> ```
 
 ### 3. Instalar dependencias del proyecto
 Con el entorno virtual activado, instala las bibliotecas necesarias:
@@ -81,14 +80,14 @@ A continuación, debes desplegar Apache Jena Fuseki, que es donde se van a guard
   cd ruta/donde/guardaste/apache-jena-fuseki
   ```
 4. Inicia el servidor con el siguiente comando:
-- En Windows:
-  ```bash
-  fuseki-server.bat --update --tdb2
-  ```
-- En Linux/macOS:
-  ```bash
-  ./fuseki-server --update --tdb2
-  ```
+> En Windows:
+> ```bash
+> fuseki-server.bat --update --tdb2
+> ```
+> En Linux/macOS:
+> ```bash
+> ./fuseki-server --update --tdb2
+> ```
 Esto iniciará Fuseki en modo escritura y con persistencia de datos.
 5. Abre tu navegador y accede a: http://localhost:3030/
 Si ves el panel de Fuseki, ¡todo está funcionando correctamente!
@@ -99,14 +98,14 @@ Vuelve a la terminal donde clonaste el repositorio (o abre una nueva y ve a la c
 cd ruta/tfg_app
 ```
 Asegúrate de que el entorno virtual esté activado con:
- - En Windows:
-    ```bash
-    fuseki-server.bat --update --tdb2
-    ```
-- En Linux/macOS:
-  ```bash
-  ./fuseki-server --update --tdb2
-  ```
+> En Windows:
+> ```bash
+>   fuseki-server.bat --update --tdb2
+>   ```
+> En Linux/macOS:
+> ```bash
+> ./fuseki-server --update --tdb2
+> ```
 Dirígete a la subcarpeta tfg_project:
 ```bash
 cd tfg_project
@@ -126,14 +125,14 @@ Cada vez que apagues el ordenador o cierres todo, necesitarás replicar parte de
    cd ruta/donde/guardaste/apache-jena-fuseki
    ```
 3. Ejecuta:
-  - En Windows:
-    ```bash
-    fuseki-server.bat --update --tdb2
-    ```
-- En Linux/macOS:
-  ```bash
-  ./fuseki-server --update --tdb2
-  ```
+> En Windows:
+>   ```bash
+>     fuseki-server.bat --update --tdb2
+>   ```
+>   En Linux/macOS:
+> ```bash
+> ./fuseki-server --update --tdb2
+> ```
 
 **No cierres esta ventana** mientras uses la aplicación.
 
@@ -144,14 +143,14 @@ Cada vez que apagues el ordenador o cierres todo, necesitarás replicar parte de
    cd ruta/tfg_app
    ```
 3. Activa el entorno virtual:
-  - En Windows:
-  ```bash
-  venv\Scripts\activate
-  ```
-- En Linux/macOS:
-  ```bash
-  source venv/bin/activate
-  ```
+> En Windows:
+> ```bash
+> venv\Scripts\activate
+> ```
+> En Linux/macOS:
+> ```bash
+> source venv/bin/activate
+> ```
 4. Navega a la subcarpeta tfg_project:
    ```bash
    cd tfg_project
