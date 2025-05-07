@@ -116,6 +116,8 @@ python manage.py runserver
 ```
 Ahora ya puedes abrir tu navegador y visitar la aplicación en: http://127.0.0.1:8000
 
+---
+
 ## Cómo volver a iniciar la aplicación
 Cada vez que apagues el ordenador o cierres todo, necesitarás replicar parte del paso 4 y 5 anteriormente explicados para iniciar Apache Jena Fuseki y Django. A continuación se explica paso a paso:
 ### 1. Apache Jena Fuseki
@@ -161,31 +163,35 @@ Cada vez que apagues el ordenador o cierres todo, necesitarás replicar parte de
    ```
 6. Abre tu navegador y accede a: http://127.0.0.1:8000
 
+--- 
+
 ## Cómo utilizar la aplicación
 A continuación, se explica cómo acceder y hacer uso de las principales funcionalidades de la aplicación.
 ### Subida de datasets
 Para cargar un nuevo conjunto de datos RDF en la aplicación:
 - Dirígete a la página de **Subida de Datos**, cuyo enlace se encuentra en la página de inicio
-![image](https://github.com/user-attachments/assets/80d0bb6b-be4d-4d83-a543-a1be50aac3f7)
+![1](https://github.com/user-attachments/assets/8fc37f1a-fcb7-49a4-80f4-8ffabd48f3f7)
+
 
 - Haz clic en "Seleccionar archivo"
-![image](https://github.com/user-attachments/assets/a3c6993f-b2eb-4d87-b1c2-fafb98ce7c8b)
+  ![2](https://github.com/user-attachments/assets/96645646-5fee-4e18-b202-a476e2a9cb03)
 
 - Elige el archivo RDF de tu dispositivo y haz clic en subir. El sistema procesará el archivo y generará un resumen de los datos
 
 ### Selección y visualización de datos
 Para explorar un dataset cargado en la plataforma:
 - Desde la página principal, selecciona un dataset del desplegable
-![image](https://github.com/user-attachments/assets/def42b91-1607-483b-9fc1-f4b8c93ec260)
+![3](https://github.com/user-attachments/assets/f4545b7d-8856-425f-9c8a-f96948ae0764)
 
 - Accede a la sección de Estadísticas para visualizar métricas y gráficos
-![image](https://github.com/user-attachments/assets/7546d34e-a233-4671-a9f3-90c10f649355)
+![4](https://github.com/user-attachments/assets/6b21f2a9-b464-4eef-b24a-4dcd2f7cb29f)
+
 
 ### Filtrado de instancias
 Para encontrar información específica dentro de un dataset:
 - Accede a la página de Estadísticas
 - Usa la barra lateral de filtros para buscar por clase, sujeto, propiedad u objeto
-![image](https://github.com/user-attachments/assets/52f0ed23-e887-4caa-a3a4-2936e1a4c1f0)
+![5](https://github.com/user-attachments/assets/113b6b74-f8c1-4d60-aada-2d2fd3c163ca)
 
 - Aplica filtros adicionales usando los modos AND u OR
 - Haz clic en "Buscar" para ver los resultados
@@ -200,30 +206,35 @@ Ejemplo: Si trabajas con un dataset sobre películas y seleccionas "Película" c
 ### Visualización de instancias
 Para obtener detalles sobre una instancia específica:
 - Tras aplicar un filtro, haz clic en el nombre de una instancia en la lista de resultados
-![image](https://github.com/user-attachments/assets/ea718055-e435-493e-8d2a-c440545e0636)
+![6](https://github.com/user-attachments/assets/4d4b2f99-fa2a-4f60-93b8-15d6dacae369)
+
 
 - Se mostrará una página con las propiedades y valores de la instancia
-![image](https://github.com/user-attachments/assets/55eee8f7-a2b5-4859-b28d-2e85396ddb8f)
+![7](https://github.com/user-attachments/assets/25dee84b-f869-4e0d-922b-c718a97d6b8d)
+
 
 - Si hay enlaces a otras instancias, podrás navegar entre ellas
 
 ### Consulta de datos con SPARQL
 Si deseas realizar consultas avanzadas sobre los datos RDF:
 - Ve a la página de consulta SPARQL
-![image](https://github.com/user-attachments/assets/5057524d-5d3e-492a-920a-aacd9616a365)
+![8](https://github.com/user-attachments/assets/64e079bf-03c0-4b66-a665-b6bc581bb1cf)
 
 - Introduce tu consulta en el editor
 - Haz clic en "Ejecutar Consulta"
 - Los resultados se mostrarán en formato tabla y se podrán exportar en CSV, TSV o JSON
-![image](https://github.com/user-attachments/assets/1d1a0e6c-324f-4991-9add-efd5f858d947)
+![9](https://github.com/user-attachments/assets/e9cdaac4-0514-45ba-96f4-7d93296eaf46)
 
 ### Eliminación y Actualización de Datasets
 Si necesitas actualizar o eliminar un dataset:
 - Desde la página principal, selecciona un dataset
 - Usa los botones "Actualizar dataset" o "Eliminar dataset"
-![image](https://github.com/user-attachments/assets/14ce11d8-6180-48f2-a7f9-6debc9bef3e9)
+![10](https://github.com/user-attachments/assets/e8fba350-5dc6-4722-8299-edadef58e63d)
+
 
 - Si decides eliminar un dataset, se pedirá confirmación antes de proceder.
+
+---
 
 ## Licencia
 Este proyecto está disponible bajo la licencia Creative Commons Zero v1.0 Universal (CC0 1.0). Puedes usar, modificar y compartir libremente el código.
