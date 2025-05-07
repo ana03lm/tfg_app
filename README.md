@@ -89,6 +89,7 @@ A continuación, debes desplegar Apache Jena Fuseki, que es donde se van a guard
 > ./fuseki-server --update --tdb2
 > ```
 Esto iniciará Fuseki en modo escritura y con persistencia de datos.
+
 5. Abre tu navegador y accede a: http://localhost:3030/
 Si ves el panel de Fuseki, ¡todo está funcionando correctamente!
 
@@ -202,6 +203,7 @@ Para encontrar información específica dentro de un dataset:
 
 #### ¿Qué es la clase base?
 La clase base define el conjunto principal de instancias sobre el cual se aplicarán el resto de los filtros. Si seleccionas una clase base, todas las instancias mostradas pertenecerán a esa clase. Luego, puedes aplicar otros filtros adicionales para refinar los resultados, combinándolos mediante AND u OR.
+
 Ejemplo: Si trabajas con un dataset sobre películas y seleccionas "Película" como clase base, todas las instancias mostradas serán películas. Luego, podrías aplicar filtros como "director" o "año de estreno" para reducir aún más la búsqueda. Serán estos otros filtros a los que se aplique el modo de búsqueda seleccionado, pero la clase base se mantiene "fija" a pesar de que se utilice OR.
 #### Diferencia entre modos de búsqueda AND y OR:
 - **AND:** Se muestran solo las instancias que cumplen con todos los filtros aplicados simultáneamente.
