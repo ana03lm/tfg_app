@@ -162,16 +162,68 @@ Cada vez que apagues el ordenador o cierres todo, necesitarás replicar parte de
 6. Abre tu navegador y accede a: http://127.0.0.1:8000
 
 ## Cómo utilizar la aplicación
-1. Ve a la pestaña "Subida" para cargar un nuevo dataset RDF.
-2. Espera a que se genere el archivo JSON con las estadísticas.
-3. Accede a "Estadísticas" para visualizar métricas y gráficos.
-4. Utiliza el panel lateral para filtrar instancias.
-5. Pincha en una instancia para ver sus propiedades.
-6. Ve a "Consulta SPARQL" para realizar consultas manuales.
-7. Exporta los resultados de búsquedas o consultas si lo deseas.
+A continuación, se explica cómo acceder y hacer uso de las principales funcionalidades de la aplicación.
+### Subida de datasets
+Para cargar un nuevo conjunto de datos RDF en la aplicación:
+- Dirígete a la página de **Subida de Datos**, cuyo enlace se encuentra en la página de inicio
+![image](https://github.com/user-attachments/assets/80d0bb6b-be4d-4d83-a543-a1be50aac3f7)
 
-## Ayuda
-Dentro de la aplicación encontrarás una sección de **Ayuda** accesible desde el menú de navegación, donde se explican todas las funcionalidades y cómo utilizarlas paso a paso.
+- Haz clic en "Seleccionar archivo"
+![image](https://github.com/user-attachments/assets/a3c6993f-b2eb-4d87-b1c2-fafb98ce7c8b)
+
+- Elige el archivo RDF de tu dispositivo y haz clic en subir. El sistema procesará el archivo y generará un resumen de los datos
+
+### Selección y visualización de datos
+Para explorar un dataset cargado en la plataforma:
+- Desde la página principal, selecciona un dataset del desplegable
+![image](https://github.com/user-attachments/assets/def42b91-1607-483b-9fc1-f4b8c93ec260)
+
+- Accede a la sección de Estadísticas para visualizar métricas y gráficos
+![image](https://github.com/user-attachments/assets/7546d34e-a233-4671-a9f3-90c10f649355)
+
+### Filtrado de instancias
+Para encontrar información específica dentro de un dataset:
+- Accede a la página de Estadísticas
+- Usa la barra lateral de filtros para buscar por clase, sujeto, propiedad u objeto
+![image](https://github.com/user-attachments/assets/52f0ed23-e887-4caa-a3a4-2936e1a4c1f0)
+
+- Aplica filtros adicionales usando los modos AND u OR
+- Haz clic en "Buscar" para ver los resultados
+
+#### ¿Qué es la clase base?
+La clase base define el conjunto principal de instancias sobre el cual se aplicarán el resto de los filtros. Si seleccionas una clase base, todas las instancias mostradas pertenecerán a esa clase. Luego, puedes aplicar otros filtros adicionales para refinar los resultados, combinándolos mediante AND u OR.
+Ejemplo: Si trabajas con un dataset sobre películas y seleccionas "Película" como clase base, todas las instancias mostradas serán películas. Luego, podrías aplicar filtros como "director" o "año de estreno" para reducir aún más la búsqueda. Serán estos otros filtros a los que se aplique el modo de búsqueda seleccionado, pero la clase base se mantiene "fija" a pesar de que se utilice OR.
+#### Diferencia entre modos de búsqueda AND y OR:
+- **AND:** Se muestran solo las instancias que cumplen con todos los filtros aplicados simultáneamente.
+- **OR:** Se muestran las instancias que cumplen al menos uno de los filtros aplicados. Sin embargo, la clase base no se ve afectada por esta condición y sigue actuando como filtro fijo.
+
+### Visualización de instancias
+Para obtener detalles sobre una instancia específica:
+- Tras aplicar un filtro, haz clic en el nombre de una instancia en la lista de resultados
+![image](https://github.com/user-attachments/assets/ea718055-e435-493e-8d2a-c440545e0636)
+
+- Se mostrará una página con las propiedades y valores de la instancia
+![image](https://github.com/user-attachments/assets/55eee8f7-a2b5-4859-b28d-2e85396ddb8f)
+
+- Si hay enlaces a otras instancias, podrás navegar entre ellas
+
+### Consulta de datos con SPARQL
+Si deseas realizar consultas avanzadas sobre los datos RDF:
+- Ve a la página de consulta SPARQL
+![image](https://github.com/user-attachments/assets/5057524d-5d3e-492a-920a-aacd9616a365)
+
+- Introduce tu consulta en el editor
+- Haz clic en "Ejecutar Consulta"
+- Los resultados se mostrarán en formato tabla y se podrán exportar en CSV, TSV o JSON
+![image](https://github.com/user-attachments/assets/1d1a0e6c-324f-4991-9add-efd5f858d947)
+
+### Eliminación y Actualización de Datasets
+Si necesitas actualizar o eliminar un dataset:
+- Desde la página principal, selecciona un dataset
+- Usa los botones "Actualizar dataset" o "Eliminar dataset"
+![image](https://github.com/user-attachments/assets/14ce11d8-6180-48f2-a7f9-6debc9bef3e9)
+
+- Si decides eliminar un dataset, se pedirá confirmación antes de proceder.
 
 ## Licencia
 Este proyecto está disponible bajo la licencia Creative Commons Zero v1.0 Universal (CC0 1.0). Puedes usar, modificar y compartir libremente el código.
