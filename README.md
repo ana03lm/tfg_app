@@ -1,4 +1,4 @@
-![1](https://github.com/user-attachments/assets/ff846bd2-a8e8-4bc3-9371-bf3b354c1f8b)# Aplicación para la Consulta y Visualización de Datos Semánticos RDF
+# Aplicación para la Consulta y Visualización de Datos Semánticos RDF
 
 Este proyecto es una **aplicación web desarrollada con Django** que permite la **consulta, exploración y visualización de conjuntos de datos RDF** almacenados en Apache Jena Fuseki. Su objetivo es facilitar la comprensión y análisis de grandes datasets semánticos mediante métricas, filtros y visualizaciones interactivas, así como permitir consultas SPARQL avanzadas.
 
