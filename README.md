@@ -171,11 +171,12 @@ A continuación, se explica cómo acceder y hacer uso de las principales funcion
 Para cargar un nuevo conjunto de datos RDF en la aplicación:
 - Dirígete a la página de **Subida de Datos**, cuyo enlace se encuentra en la página de inicio
   
-  ![1](https://github.com/user-attachments/assets/61728f00-fbc9-4f31-92e5-2073a035a122)
+  ![1](https://github.com/user-attachments/assets/323a2da2-1366-400a-8444-c2182446810a)
+
 
 - Haz clic en "Seleccionar archivo"
 
-  ![2](https://github.com/user-attachments/assets/6e9e0d8f-a4ad-4eea-b927-b7b126e86e53)
+  ![2](https://github.com/user-attachments/assets/eb97981a-d344-4c6a-8068-849a3e59b42a)
 
 - Elige el archivo RDF de tu dispositivo y haz clic en subir. El sistema procesará el archivo y generará un resumen de los datos
 
@@ -183,18 +184,18 @@ Para cargar un nuevo conjunto de datos RDF en la aplicación:
 Para explorar un dataset cargado en la plataforma:
 - Desde la página principal, selecciona un dataset del desplegable
 
-   ![3](https://github.com/user-attachments/assets/daf74d1d-41b8-4e80-9df4-ecbbb43494ce)
+   ![3](https://github.com/user-attachments/assets/1c0b393b-3d9e-4f9e-b8ee-8f22c0ebc81a)
 
 - Accede a la sección de Estadísticas para visualizar métricas y gráficos
 
-  ![4](https://github.com/user-attachments/assets/002f0211-8822-49be-8ad3-80316fe41b9a)
+  ![4](https://github.com/user-attachments/assets/909356fc-8515-44fd-88db-a6ae5d0aaddc)
 
 ### Filtrado de instancias
 Para encontrar información específica dentro de un dataset:
 - Accede a la página de Estadísticas
 - Usa la barra lateral de filtros para buscar por clase, sujeto, propiedad u objeto
 
-  ![5](https://github.com/user-attachments/assets/df8e594a-4946-442b-90d3-c330c5f9a1f1)
+  ![5](https://github.com/user-attachments/assets/0c214b56-d2d7-421e-a12e-2ac002d6087e)
 
 - Aplica filtros adicionales usando los modos AND u OR
 - Haz clic en "Buscar" para ver los resultados
@@ -210,11 +211,11 @@ Ejemplo: Si trabajas con un dataset sobre películas y seleccionas "Película" c
 Para obtener detalles sobre una instancia específica:
 - Tras aplicar un filtro, haz clic en el nombre de una instancia en la lista de resultados
 
-  ![6](https://github.com/user-attachments/assets/1612bc90-ab73-43e1-83ca-5f6c4e0e3fe8)
+  ![6](https://github.com/user-attachments/assets/d810227d-644f-4db7-8406-ce1f9c920cac)
 
 - Se mostrará una página con las propiedades y valores de la instancia
 
-  ![7](https://github.com/user-attachments/assets/e42a4899-9ea3-478b-be32-5323e412cae3)
+  ![7](https://github.com/user-attachments/assets/3c65aeac-efb6-4ecd-bcad-40bdf7832409)
 
 - Si hay enlaces a otras instancias, podrás navegar entre ellas
 
@@ -222,21 +223,20 @@ Para obtener detalles sobre una instancia específica:
 Si deseas realizar consultas avanzadas sobre los datos RDF:
 - Ve a la página de consulta SPARQL
 
-  ![8](https://github.com/user-attachments/assets/5ba99492-fc97-429d-9cd5-fa2e713405ab)
+  ![8](https://github.com/user-attachments/assets/0c96266b-18f6-4937-82fe-c71a4a205d16)
 
 - Introduce tu consulta en el editor
 - Haz clic en "Ejecutar Consulta"
 - Los resultados se mostrarán en formato tabla y se podrán exportar en CSV, TSV o JSON
 
-  ![9](https://github.com/user-attachments/assets/687f7f35-0dd9-4109-bb8d-dee5c16ac638)
-
+  ![9](https://github.com/user-attachments/assets/64816dc0-239c-45d4-9f6e-0cfa0e9ee2d2)
 
 ### Eliminación y Actualización de Datasets
 Si necesitas actualizar o eliminar un dataset:
 - Desde la página principal, selecciona un dataset
 - Usa los botones "Actualizar dataset" o "Eliminar dataset"
 
-  ![10](https://github.com/user-attachments/assets/4d52c661-1521-49ae-823f-588bf6b21161)
+  ![10](https://github.com/user-attachments/assets/85b8d5e1-5a8e-4cf6-a993-a60d7c3e1eef)
 
 - Si decides eliminar un dataset, se pedirá confirmación antes de proceder.
 
