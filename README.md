@@ -170,8 +170,7 @@ A continuación, se explica cómo acceder y hacer uso de las principales funcion
 ### Subida de datasets
 Para cargar un nuevo conjunto de datos RDF en la aplicación:
 - Dirígete a la página de **Subida de Datos**, cuyo enlace se encuentra en la página de inicio
-![1](https://github.com/user-attachments/assets/8fc37f1a-fcb7-49a4-80f4-8ffabd48f3f7)
-
+  ![g2155](https://github.com/user-attachments/assets/8643f586-5902-4076-b756-2f89e9774482)
 
 - Haz clic en "Seleccionar archivo"
   ![2](https://github.com/user-attachments/assets/96645646-5fee-4e18-b202-a476e2a9cb03)
